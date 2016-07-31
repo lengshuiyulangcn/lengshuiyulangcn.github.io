@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Gyorouのぼっち日記">
+    <title>Redux/React 与 ActionCable 友好合作的一些备忘 - Gyorouのぼっち日記</title>
+    <meta name="author" content="Gyorou">
+    
+    
+    
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+    
+    <meta name="description" content="使用ActionCable和Redux可以在Rails中内置消息提示啊，即时聊天之类的功能。所以有必要了解一些实现方法。setup基本抄袭railsでreact(react-rails)とreduxを動かす
+使用的基本思路是创建ActionCable的Channel，在channel的event中调用Redux的action改变Store的state。将store的state绑定到React的Co">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="Redux/React 与 ActionCable 友好合作的一些备忘">
+<meta property="og:url" content="http://blog.bocchi.tokyo/2016/07/03/20160703/index.html">
+<meta property="og:site_name" content="Gyorouのぼっち日記">
+<meta property="og:description" content="使用ActionCable和Redux可以在Rails中内置消息提示啊，即时聊天之类的功能。所以有必要了解一些实现方法。setup基本抄袭railsでreact(react-rails)とreduxを動かす
+使用的基本思路是创建ActionCable的Channel，在channel的event中调用Redux的action改变Store的state。将store的state绑定到React的Co">
+<meta property="og:updated_time" content="2016-07-03T13:07:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redux/React 与 ActionCable 友好合作的一些备忘">
+<meta name="twitter:description" content="使用ActionCable和Redux可以在Rails中内置消息提示啊，即时聊天之类的功能。所以有必要了解一些实现方法。setup基本抄袭railsでreact(react-rails)とreduxを動かす
+使用的基本思路是创建ActionCable的Channel，在channel的event中调用Redux的action改变Store的state。将store的state绑定到React的Co">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=640"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/assets/css/tranquilpeak.css">
+    <!--STYLES END-->
+    
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+    
+
+<header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/ ">Gyorouのぼっち日記</a>
+    </h1>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=90"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+    
+
+<nav id="sidebar" data-behavior="3">
+    
+        <div class="sidebar-profile">
+            <a href="/#about">
+                    <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=110"/>
+            </a>
+            <span class="sidebar-profile-name">Gyorou</span>
+            <p>work, life and shitty ideas</p>
+        </div>
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">首页</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">分类</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">标签</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">归档</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">搜索</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="http://blog.bocchi.tokyo:8080"
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-history"></i>
+                    <span class="sidebar-button-desc">往事</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            Redux/React 与 ActionCable 友好合作的一些备忘
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Sun Jul 03 2016 13:06:28 GMT+0000">
+	
+		    7月 03, 2016
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <p>使用ActionCable和Redux可以在Rails中内置消息提示啊，即时聊天之类的功能。所以有必要了解一些实现方法。<br>setup基本抄袭<a href="http://qiita.com/suzan2go/items/24ef3320e04b8a84597f" target="_blank" rel="external">railsでreact(react-rails)とreduxを動かす</a></p>
+<p>使用的基本思路是创建ActionCable的Channel，在channel的event中调用Redux的action改变Store的state。<br>将store的state绑定到React的Component的state，完成rerender。</p>
+<p>我们用一个实现在线用户即时聊天例子说明。<br>首先用Rails新建一个ActionCable的Channel。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># app/channels/chat_channel.rb</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChatChannel</span> &lt; ApplicationCable::Channel</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">subscribed</span></span></span><br><span class="line">    stop_all_streams</span><br><span class="line">    stream_from <span class="string">"chat_all"</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># chat on the channel</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">speak</span><span class="params">(data)</span></span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">self</span>.current_user_id</span><br><span class="line">      user = User.find(<span class="keyword">self</span>.current_user_id)</span><br><span class="line">      user_image = user.avatar? ? user.avatar.url : user.letter_avatar_url(<span class="number">48</span>)</span><br><span class="line">      timestamp = Time.now.strftime(<span class="string">'%H:%M:%S'</span>)</span><br><span class="line">      ActionCable.server.broadcast(<span class="string">"chat_all"</span>, <span class="symbol">user_name:</span> user.name, <span class="symbol">user_image:</span> user_image, <span class="symbol">message:</span> data[<span class="string">"message"</span>], <span class="symbol">time:</span> timestamp)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">unsubscribed</span></span></span><br><span class="line">    stop_all_streams</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>每当有用户发言，我们群播(broadcast)该用户的用户名，头像，以及发言。<br>这里的<code>self.current_user_id</code>来自user Cookie中的<code>user_id</code>。<br><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># app/channels/application_cable/connection.rb</span></span><br><span class="line"><span class="class"><span class="keyword">module</span> <span class="title">ApplicationCable</span></span></span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">Connection</span> &lt; ActionCable::Connection::<span class="title">Base</span></span></span><br><span class="line">    identified_by <span class="symbol">:current_user_id</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">connect</span></span></span><br><span class="line">      <span class="keyword">self</span>.current_user_id = find_verified_user_id</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    protected</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">find_verified_user_id</span></span></span><br><span class="line">      cookies.signed[<span class="symbol">:user_id</span>] <span class="params">||</span> <span class="literal">nil</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></p>
+<p>简单起见，我们把需要的前段代码都写到一块。<br>首先是reducer 和 store。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; createStore &#125; <span class="keyword">from</span> <span class="string">'redux'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> messageReducer = (state = [], action) =&gt; &#123;</span><br><span class="line">  <span class="keyword">switch</span>(action.type) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">"NEW_MESSAGE"</span>:</span><br><span class="line">      <span class="keyword">return</span> [</span><br><span class="line">        ...state,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">from</span>: action.payload.from,</span><br><span class="line">          image: action.payload.image,</span><br><span class="line">          text: action.payload.text,</span><br><span class="line">          time: action.payload.time</span><br><span class="line">        &#125;</span><br><span class="line">      ];</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> state;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> messageer = createStore(messageReducer);</span><br></pre></td></tr></table></figure>
+<p>接下来建立一个ActionCable的client对<code>ChatChannel</code>进行监听。 当收到消息的时候，我们调用 store 的dispatch 方法更新state。<br>当用户发言，我们调用server的speak方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">App.room = App.cable.subscriptions.create(<span class="string">"ChatChannel"</span>, &#123;</span><br><span class="line">        connected: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;,</span><br><span class="line">        disconnected: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;,</span><br><span class="line">        received: <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">          messageer.dispatch(&#123;type: <span class="string">"NEW_MESSAGE"</span>, payload: &#123;<span class="keyword">from</span>: data[<span class="string">"user_name"</span>], image: data[<span class="string">"user_image"</span>], text: data[<span class="string">"message"</span>], time: data[<span class="string">"time"</span>]&#125;&#125;)</span><br><span class="line">        &#125;,</span><br><span class="line">        speak: <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">           <span class="keyword">this</span>.perform(<span class="string">'speak'</span>, &#123;</span><br><span class="line">            message: message</span><br><span class="line">          &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br></pre></td></tr></table></figure>
+<p>最后把store和React的Component绑定在一起即可。最简单的方法就是在componentDidMount中调用store的subscribe方法更新component的state。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">componentDidMount() &#123;</span><br><span class="line">   messageer.subscribe(()=&gt;&#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;messages: messageer.getState()&#125;)</span><br><span class="line">   &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>暂时想到这么多。</p>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/ActionCable/">ActionCable</a> <a class="tag tag--primary tag--small t-link" href="/tags/Rails/">Rails</a> <a class="tag tag--primary tag--small t-link" href="/tags/React/">React</a> <a class="tag tag--primary tag--small t-link" href="/tags/Redux/">Redux</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/07/10/20160710/"  data-tooltip="Docker-compose 搭建快速开发环境">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/06/26/20160626-md/" data-tooltip="在 Rails 5 中使用 ActionCable 和 Redis-objects 实现实时显示当前在线用户">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Gyorou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/07/10/20160710/"  data-tooltip="Docker-compose 搭建快速开发环境">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/06/26/20160626-md/" data-tooltip="在 Rails 5 中使用 ActionCable 和 Redis-objects 实现实时显示当前在线用户">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-google-plus"></i><span class="">分享到 Google+</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-facebook-official"></i><span>分享到 Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/07/03/20160703/">
+                <i class="fa fa-twitter"></i><span>分享到 Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        
+
+
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <img id="about-card-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=110"/>
+        
+            <h4 id="about-card-name">Gyorou</h4>
+        
+            <h5 id="about-card-bio"><p>work, life and shitty ideas</p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Web Engineer In Tokyo</p>
+
+            </h5>
+        
+        
+            <h5 id="about-card-location">
+                <i class="fa fa-map-marker"></i>
+                <br/>
+                Tokyo
+            </h5>
+        
+    </div>
+</div>
+
+        
+<div id="cover" style="background-image:url('/assets/images/hanabi.jpeg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/assets/js/jquery.js"></script>
+<script src="/assets/js/jquery.fancybox.js"></script>
+<script src="/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/assets/js/tranquilpeak.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'http://blog.bocchi.tokyo/2016/07/03/20160703/';
+                 
+                    this.page.identifier = '2016/07/03/20160703/';
+                                  
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'bocchi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+
+</html>

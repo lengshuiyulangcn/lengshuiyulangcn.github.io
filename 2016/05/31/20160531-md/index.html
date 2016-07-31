@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Gyorouのぼっち日記">
+    <title>rack 中间件 warden 的机制 - Gyorouのぼっち日記</title>
+    <meta name="author" content="Gyorou">
+    
+    
+    
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+    
+    <meta name="description" content="说到warden，大概很多人感觉很陌生。然而很多人耳熟能详的Devise就恰恰是基于warden构建的。所以当我们customize Devise的一些功能的时候常常看到有warden这个关键词的出现。要深入了解Devise的验证机制，不如先从了解warden这个东西入手。
+概述warden在rack中间件的堆放位置大抵位于session下流。
+12345678910Rack::Builder.n">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="rack 中间件 warden 的机制">
+<meta property="og:url" content="http://blog.bocchi.tokyo/2016/05/31/20160531-md/index.html">
+<meta property="og:site_name" content="Gyorouのぼっち日記">
+<meta property="og:description" content="说到warden，大概很多人感觉很陌生。然而很多人耳熟能详的Devise就恰恰是基于warden构建的。所以当我们customize Devise的一些功能的时候常常看到有warden这个关键词的出现。要深入了解Devise的验证机制，不如先从了解warden这个东西入手。
+概述warden在rack中间件的堆放位置大抵位于session下流。
+12345678910Rack::Builder.n">
+<meta property="og:updated_time" content="2016-05-31T13:38:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="rack 中间件 warden 的机制">
+<meta name="twitter:description" content="说到warden，大概很多人感觉很陌生。然而很多人耳熟能详的Devise就恰恰是基于warden构建的。所以当我们customize Devise的一些功能的时候常常看到有warden这个关键词的出现。要深入了解Devise的验证机制，不如先从了解warden这个东西入手。
+概述warden在rack中间件的堆放位置大抵位于session下流。
+12345678910Rack::Builder.n">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=640"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/assets/css/tranquilpeak.css">
+    <!--STYLES END-->
+    
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+    
+
+<header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/ ">Gyorouのぼっち日記</a>
+    </h1>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=90"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+    
+
+<nav id="sidebar" data-behavior="3">
+    
+        <div class="sidebar-profile">
+            <a href="/#about">
+                    <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=110"/>
+            </a>
+            <span class="sidebar-profile-name">Gyorou</span>
+            <p>work, life and shitty ideas</p>
+        </div>
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">首页</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">分类</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">标签</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">归档</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">搜索</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="http://blog.bocchi.tokyo:8080"
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-history"></i>
+                    <span class="sidebar-button-desc">往事</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            rack 中间件 warden 的机制
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Tue May 31 2016 13:37:52 GMT+0000">
+	
+		    5月 31, 2016
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <p>说到warden，大概很多人感觉很陌生。然而很多人耳熟能详的Devise就恰恰是基于warden构建的。<br>所以当我们customize Devise的一些功能的时候常常看到有warden这个关键词的出现。<br>要深入了解Devise的验证机制，不如先从了解warden这个东西入手。</p>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>warden在rack中间件的堆放位置大抵位于session下流。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">Rack:</span><span class="symbol">:Builder</span>.new <span class="keyword">do</span></span><br><span class="line">  <span class="keyword">use</span> <span class="symbol">Rack:</span><span class="symbol">:Session</span><span class="symbol">:</span><span class="symbol">:Cookie</span>, <span class="symbol">:secret</span> =&gt; <span class="string">"replace this with some secret key"</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">use</span> <span class="symbol">Warden:</span><span class="symbol">:Manager</span> <span class="keyword">do</span> |manager|</span><br><span class="line">    manager.default_strategies <span class="symbol">:password</span>, <span class="symbol">:basic</span></span><br><span class="line">    manager.failure_app = BadAuthenticationEndsUpHere</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  run SomeApp</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>其中，default_strategies 是warden默认使用的验证策略。而failure_app则是当验证失败的时候处理相关内容的中间件。</p>
+<p>使用warden来验证用户很简单。基本就是以下几个用法。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticated</span>?               # <span class="selector-tag">request</span>是否已经验证</span><br><span class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticated</span>?(<span class="selector-pseudo">:foo)</span>         # 在<span class="selector-tag">scope</span> <span class="selector-tag">foo</span> 中<span class="selector-tag">request</span>是否已经验证</span><br><span class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticate</span>(<span class="selector-pseudo">:password)</span>      # 试着用<span class="selector-tag">password</span> <span class="selector-tag">strategy</span>来验证，不过就算验证不通过也会继续执行</span><br><span class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticate</span>!(<span class="selector-pseudo">:password)</span>     # 同上，但是验证不通过就会被<span class="selector-tag">failure_app</span>处理</span><br></pre></td></tr></table></figure>
+<p>要注意的是，warden并不会主动来验证并拒绝request。只有当我们调用以上的验证方法的时候，warden才会横空挡路。<br>这也就是为什么我们使用devise的时候，通常在controller的before_action hook下面写上<code>authorize_user!</code>的原因了。</p>
+<p>如果request通过验证，我们就可以通过<code>env[&#39;warden&#39;].user</code>来获取用户的instance。那warden是肿么获取用户的instance的呢？当然我们得告诉他。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1</span></span><br><span class="line">Warden::Manager.serialize_into_session <span class="keyword">do</span> <span class="params">|user|</span></span><br><span class="line">  user.id</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#2</span></span><br><span class="line">Warden::Manager.serialize_from_session <span class="keyword">do</span> <span class="params">|id|</span></span><br><span class="line">  User.get(id)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>其实很一目了然。request通过验证之后，在＃1中我们将用户的id写到session里面去。而后在#2中我们自然就可以获取用户的id，从而获取用户的instance。</p>
+<h3 id="strategy策略"><a href="#strategy策略" class="headerlink" title="strategy策略"></a>strategy策略</h3><p>warden 通过strategy来定义用户验证策略。<br>我们来看一下password strategy的实现。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Warden::Strategies.add(<span class="symbol">:password</span>) <span class="keyword">do</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">valid?</span></span></span><br><span class="line">    params[<span class="string">'username'</span>] <span class="params">||</span> params[<span class="string">'password'</span>]</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">authenticate!</span></span></span><br><span class="line">    u = User.authenticate(params[<span class="string">'username'</span>], params[<span class="string">'password'</span>])</span><br><span class="line">    u.<span class="literal">nil</span>? ? fail!(<span class="string">"Could not log in"</span>) : success!(u)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>valid?方法作为strategy的哨兵，在验证策略发动前进行一些检查。如果不写这个方法，那么strategy总是会发送。</p>
+<p>authenticate!则是真正验证的方法。比如上面的例子里面我们看到其调用了User的authenticate方法对用户名密码进行验证。</p>
+<p>在验证的时候我们可以用到的一些方法有</p>
+<ul>
+<li>request – Rack::Request object</li>
+<li>session – The session object for the request</li>
+<li>params – The parameters of the request</li>
+<li>env – The Rack env object</li>
+</ul>
+<p>比如上面我们用params获取了传来的用户名和密码参数。</p>
+<p>进行验证之后，根据验证结果，我们可以有一下处理。</p>
+<ul>
+<li>halt! – 停止接下来所有的strategy。当前的strategy会作为最后一个策略。</li>
+<li>pass – 直接忽略次策略。当然不推荐就是了。ignore this strategy. It is not required to call this and this is only sugar.</li>
+<li>success! – 策略成功。因为warden的策略有一个成功即会停止，所以紧接着会造成halt!也发动。</li>
+<li>fail! – 策略失败。并发动halt！</li>
+<li>redirect! – 跳转到另一个url。同样发动halt!</li>
+<li>custom! – 返回一个自定义的rack array并造成halt!</li>
+</ul>
+<h3 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h3><p>当Devise太重的时候我们完全可以通过定制自己的warden strategy来定制我们自己的用户验证机制。</p>
+<p>Rack的层层堆砌逐渐由模糊到清晰起来。</p>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/Ruby/">Ruby</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/06/05/20160605/"  data-tooltip="ActionCable 的个人备忘">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/05/14/20160514-md/" data-tooltip="如果猫从世界上消失">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Gyorou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/06/05/20160605/"  data-tooltip="ActionCable 的个人备忘">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/05/14/20160514-md/" data-tooltip="如果猫从世界上消失">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-google-plus"></i><span class="">分享到 Google+</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-facebook-official"></i><span>分享到 Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/05/31/20160531-md/">
+                <i class="fa fa-twitter"></i><span>分享到 Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        
+
+
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <img id="about-card-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=110"/>
+        
+            <h4 id="about-card-name">Gyorou</h4>
+        
+            <h5 id="about-card-bio"><p>work, life and shitty ideas</p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Web Engineer In Tokyo</p>
+
+            </h5>
+        
+        
+            <h5 id="about-card-location">
+                <i class="fa fa-map-marker"></i>
+                <br/>
+                Tokyo
+            </h5>
+        
+    </div>
+</div>
+
+        
+<div id="cover" style="background-image:url('/assets/images/hanabi.jpeg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/assets/js/jquery.js"></script>
+<script src="/assets/js/jquery.fancybox.js"></script>
+<script src="/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/assets/js/tranquilpeak.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'http://blog.bocchi.tokyo/2016/05/31/20160531-md/';
+                 
+                    this.page.identifier = '2016/05/31/20160531-md/';
+                                  
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'bocchi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+
+</html>

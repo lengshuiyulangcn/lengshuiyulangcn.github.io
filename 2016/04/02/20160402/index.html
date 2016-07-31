@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Gyorouのぼっち日記">
+    <title>在樱花满开的周末阅读RubyChina 代码有感 - Gyorouのぼっち日記</title>
+    <meta name="author" content="Gyorou">
+    
+    
+    
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+    
+    <meta name="description" content="终于天气预报说樱花满开了。周五晚上下了一夜雨，中午爬起看窗外，不幸中的万幸的阴天。漠然坐在床边，翻看着facebook上的万年不变的更新，整理一下今天需要做的事情。谁和谁成为了好友。谁和谁今天开始交际。谁对今天的什么活动感兴趣。谁赞了谁的状态…
+今天该把ruby-china的源代码clone下来看一下，顺便在local跑一边。safaribooks上堆积了几本书好歹翻一下决定是否继续看下去。顺便不">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="在樱花满开的周末阅读RubyChina 代码有感">
+<meta property="og:url" content="http://blog.bocchi.tokyo/2016/04/02/20160402/index.html">
+<meta property="og:site_name" content="Gyorouのぼっち日記">
+<meta property="og:description" content="终于天气预报说樱花满开了。周五晚上下了一夜雨，中午爬起看窗外，不幸中的万幸的阴天。漠然坐在床边，翻看着facebook上的万年不变的更新，整理一下今天需要做的事情。谁和谁成为了好友。谁和谁今天开始交际。谁对今天的什么活动感兴趣。谁赞了谁的状态…
+今天该把ruby-china的源代码clone下来看一下，顺便在local跑一边。safaribooks上堆积了几本书好歹翻一下决定是否继续看下去。顺便不">
+<meta property="og:image" content="http://blog.bocchi.tokyo/images/IMG_0240.jpg">
+<meta property="og:image" content="http://blog.bocchi.tokyo/images/IMG_0247.jpg">
+<meta property="og:image" content="http://blog.bocchi.tokyo/images/IMG_0250.jpg">
+<meta property="og:updated_time" content="2016-04-02T15:00:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="在樱花满开的周末阅读RubyChina 代码有感">
+<meta name="twitter:description" content="终于天气预报说樱花满开了。周五晚上下了一夜雨，中午爬起看窗外，不幸中的万幸的阴天。漠然坐在床边，翻看着facebook上的万年不变的更新，整理一下今天需要做的事情。谁和谁成为了好友。谁和谁今天开始交际。谁对今天的什么活动感兴趣。谁赞了谁的状态…
+今天该把ruby-china的源代码clone下来看一下，顺便在local跑一边。safaribooks上堆积了几本书好歹翻一下决定是否继续看下去。顺便不">
+<meta name="twitter:image" content="http://blog.bocchi.tokyo/images/IMG_0240.jpg">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=640"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/assets/css/tranquilpeak.css">
+    <!--STYLES END-->
+    
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+    
+
+<header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/ ">Gyorouのぼっち日記</a>
+    </h1>
+    
+        
+            <a  class="header-right-picture "
+                href="#about">
+        
+        
+            <img class="header-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=90"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+    
+
+<nav id="sidebar" data-behavior="3">
+    
+        <div class="sidebar-profile">
+            <a href="/#about">
+                    <img class="sidebar-profile-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=110"/>
+            </a>
+            <span class="sidebar-profile-name">Gyorou</span>
+            <p>work, life and shitty ideas</p>
+        </div>
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">首页</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">分类</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">标签</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">归档</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">搜索</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="http://blog.bocchi.tokyo:8080"
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-history"></i>
+                    <span class="sidebar-button-desc">往事</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            在樱花满开的周末阅读RubyChina 代码有感
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Sat Apr 02 2016 10:42:13 GMT+0000">
+	
+		    4月 02, 2016
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <p>终于天气预报说樱花满开了。周五晚上下了一夜雨，中午爬起看窗外，不幸中的万幸的阴天。<br>漠然坐在床边，翻看着facebook上的万年不变的更新，整理一下今天需要做的事情。<br>谁和谁成为了好友。<br>谁和谁今天开始交际。<br>谁对今天的什么活动感兴趣。<br>谁赞了谁的状态…</p>
+<p>今天该把<code>ruby-china</code>的源代码clone下来看一下，顺便在local跑一边。<br>safaribooks上堆积了几本书好歹翻一下决定是否继续看下去。<br>顺便不如去看看附近的樱花。</p>
+<p>大致如此吧。<br>抓起自从年末从札幌回来之后再也没摸过的相机，把macbook装进包里，洗脸刷牙，抓两把头发，匆匆出门。</p>
+<p>路上的樱花树并不多，胡乱来了两张发现相机也快没电了。随便吃了点垃圾，在站前的星巴克坐下，开始翻阅一下ruby-cina的源码。</p>
+<p><img src="/images/IMG_0240.jpg" alt=""><br><img src="/images/IMG_0247.jpg" alt=""><br><img src="/images/IMG_0250.jpg" alt=""></p>
+<h3 id="Ruby-china-的技术备忘"><a href="#Ruby-china-的技术备忘" class="headerlink" title="Ruby-china 的技术备忘"></a>Ruby-china 的技术备忘</h3><p>Ruby-china的代码感觉可读性很高，并且更新较为频繁，也用到了一些自己不熟悉的技术，首先还是先来整理一下这些平时不太接触的技术吧。</p>
+<h4 id="Elasticsearch"><a href="#Elasticsearch" class="headerlink" title="Elasticsearch"></a>Elasticsearch</h4><p>强大的站内搜索工具。配合ruby的wrapper<br><a href="https://github.com/elastic/elasticsearch-rails" target="_blank" rel="external">elasticsearch-rails</a>可以实现强大的全文搜索功能。感觉大抵和solr＋sunspot类似。另外对于中文搜索需要配合一些tokenizer。</p>
+<h4 id="Postgresql"><a href="#Postgresql" class="headerlink" title="Postgresql"></a>Postgresql</h4><p>虽然是关系型数据库，但是支持json。RubyChina之前使用mongodb，最近切换到了postgresql。</p>
+<h4 id="Actioncable"><a href="#Actioncable" class="headerlink" title="Actioncable"></a>Actioncable</h4><p>Rails 5的新特征。其实就是websocket的Rails实现。</p>
+<h4 id="second-level-cache"><a href="#second-level-cache" class="headerlink" title="second_level_cache"></a>second_level_cache</h4><p>很酷炫的一个gem。<a href="https://github.com/hooopo/second_level_cache" target="_blank" rel="external">second_level_cache</a>直接override了ActiveRecord的find方法，find方法的结果会直接被cache，但是不用担心，当发生update，delete，create等变化的时候，cache的内容也会相应得到变化。</p>
+<p>需要注意的是，这个gem的作者推荐大家使用dalli_store作为默认的store，这大概也是Ruby-china使用dalli_store的原因了。</p>
+<h4 id="rack-attack"><a href="#rack-attack" class="headerlink" title="rack-attack"></a>rack-attack</h4><p>纯引用。<code>Rack::Attack is a rack middleware to protect your web app from bad clients. It allows whitelisting, blacklisting, throttling, and tracking based on arbitrary properties of the request.</code></p>
+<h3 id="一些感想"><a href="#一些感想" class="headerlink" title="一些感想"></a>一些感想</h3><p>阅读ruby-china的源码让无聊枯燥的周末下午突然变得很有意思。<br>作为一个ruby开发者，再次深刻体会到ruby以及rails世界的深奥和广大。<br>当然ruby-china也有一些地方美中不足。<br>比如对cache依赖较多，而没有使用一些前段技术来提升用户体验和速度。<br>比如很多地方没有针对开发者的优化。<br>文档还不是十分完善，部署较为复杂，容易使得初学者望而生怯。</p>
+<p>to be continued…</p>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/Rails/">Rails</a> <a class="tag tag--primary tag--small t-link" href="/tags/Ruby/">Ruby</a> <a class="tag tag--primary tag--small t-link" href="/tags/生活/">生活</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/04/07/20160407/"  data-tooltip="杂记1">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/03/27/20160327/" data-tooltip="东京一年">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Gyorou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/04/07/20160407/"  data-tooltip="杂记1">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/03/27/20160327/" data-tooltip="东京一年">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-google-plus"></i><span class="">分享到 Google+</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-facebook-official"></i><span>分享到 Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/04/02/20160402/">
+                <i class="fa fa-twitter"></i><span>分享到 Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        
+
+
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <img id="about-card-picture" src="https://www.gravatar.com/avatar/c86f2b54c645004c0589369ae29229e4?s=110"/>
+        
+            <h4 id="about-card-name">Gyorou</h4>
+        
+            <h5 id="about-card-bio"><p>work, life and shitty ideas</p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Web Engineer In Tokyo</p>
+
+            </h5>
+        
+        
+            <h5 id="about-card-location">
+                <i class="fa fa-map-marker"></i>
+                <br/>
+                Tokyo
+            </h5>
+        
+    </div>
+</div>
+
+        
+<div id="cover" style="background-image:url('/assets/images/hanabi.jpeg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/assets/js/jquery.js"></script>
+<script src="/assets/js/jquery.fancybox.js"></script>
+<script src="/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/assets/js/tranquilpeak.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'http://blog.bocchi.tokyo/2016/04/02/20160402/';
+                 
+                    this.page.identifier = '2016/04/02/20160402/';
+                                  
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'bocchi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+
+</html>
