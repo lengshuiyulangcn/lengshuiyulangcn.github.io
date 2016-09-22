@@ -122,11 +122,11 @@
     
       <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
     
-      <category term="ActionCable" scheme="http://blog.bocchi.tokyo/tags/ActionCable/"/>
-    
       <category term="Redux" scheme="http://blog.bocchi.tokyo/tags/Redux/"/>
     
       <category term="React" scheme="http://blog.bocchi.tokyo/tags/React/"/>
+    
+      <category term="ActionCable" scheme="http://blog.bocchi.tokyo/tags/ActionCable/"/>
     
   </entry>
   
@@ -176,8 +176,8 @@
   
   <entry>
     <title>我们也许并不合适</title>
-    <link href="http://blog.bocchi.tokyo/2016/06/15/20160615/"/>
-    <id>http://blog.bocchi.tokyo/2016/06/15/20160615/</id>
+    <link href="http://blog.bocchi.tokyo/2016/06/16/20160615/"/>
+    <id>http://blog.bocchi.tokyo/2016/06/16/20160615/</id>
     <published>2016-06-15T15:40:06.000Z</published>
     <updated>2016-06-15T15:46:32.000Z</updated>
     
@@ -405,8 +405,8 @@
   
   <entry>
     <title>东京一年</title>
-    <link href="http://blog.bocchi.tokyo/2016/03/27/20160327/"/>
-    <id>http://blog.bocchi.tokyo/2016/03/27/20160327/</id>
+    <link href="http://blog.bocchi.tokyo/2016/03/28/20160327/"/>
+    <id>http://blog.bocchi.tokyo/2016/03/28/20160327/</id>
     <published>2016-03-27T15:49:34.000Z</published>
     <updated>2016-03-27T15:50:23.000Z</updated>
     
@@ -429,11 +429,11 @@
     </summary>
     
     
-      <category term="生活" scheme="http://blog.bocchi.tokyo/tags/%E7%94%9F%E6%B4%BB/"/>
-    
       <category term="毕业季" scheme="http://blog.bocchi.tokyo/tags/%E6%AF%95%E4%B8%9A%E5%AD%A3/"/>
     
       <category term="回忆" scheme="http://blog.bocchi.tokyo/tags/%E5%9B%9E%E5%BF%86/"/>
+    
+      <category term="生活" scheme="http://blog.bocchi.tokyo/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
