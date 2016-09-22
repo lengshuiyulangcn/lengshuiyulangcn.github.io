@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Gyorouのぼっち日記">
-    <title>标签: Http - Gyorouのぼっち日記</title>
+    <title>归档: 2016/9 - Gyorouのぼっち日記</title>
     <meta name="author" content="Gyorou">
     
     
@@ -15,7 +15,7 @@
     
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Gyorouのぼっち日記">
-<meta property="og:url" content="http://blog.bocchi.tokyo/tags/Http/index.html">
+<meta property="og:url" content="http://blog.bocchi.tokyo/archives/2016/09/index.html">
 <meta property="og:site_name" content="Gyorouのぼっち日記">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gyorouのぼっち日記">
@@ -194,15 +194,15 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
-                        <a class="link-unstyled" href="/2016/03/12/20160312/">
-                            Prevent Browser from caching the page
+                        <a class="link-unstyled" href="/2016/09/22/20160922/">
+                            Rack MiddleWare In and Out
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Mar 12 2016 06:04:47 GMT+0000">
+    <time itemprop="datePublished" content="Thu Sep 22 2016 03:59:57 GMT+0000">
 	
-		    3月 12, 2016
+		    9月 22, 2016
     	
     </time>
     
@@ -211,12 +211,17 @@
             
             
                 <div class="postShorten-content" itemprop="articleBody">
-                    <p>Browser Cache在大部分时候是很有用的。在大多数时候，Brower Cache可以减少对server发起request的次数减少server端的压力，以及给用户带来更流畅的体验。<br>但是有时候，我们却对Browser cache头疼不已。比如，当我们在当前页面使用ajax对页面进行了一些操作之后，转移到下一个页面，然后点击Browser的返回键返回上一个页面的时候，我们会很失望得发现我们用js进行的操作并没有及时反映。</p>
-<p>这个时候的对策则是在HTTP的headers里面强制写上不让Browser Cache的内容。在Rails中的实现方法可以是hook到<code>action_controller</code>中。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">### application_controller.rb</span></div><div class="line">private</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">set_cache_headers</span></span></div><div class="line">   response.headers[<span class="string">"Cache-Control"</span>] = <span class="string">"no-cache, no-store, max-age=0, must-revalidate"</span></div><div class="line">   response.headers[<span class="string">"Pragma"</span>] = <span class="string">"no-cache"</span></div><div class="line">   response.headers[<span class="string">"Expires"</span>] = <span class="string">"Fri, 01 Jan 1990 00:00:00 GMT"</span></div><div class="line"> <span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>这里增加了三个header。分别是<code>Cache-Control</code>, <code>Pragma</code> 以及 <code>Expires</code></p>
-<p>给<code>Expires</code> 设置一个过去的日期 和 <code>Cache-Control</code> 中设置 <code>max-age</code>其实是一回事。那么我们为什么要画蛇添足呢？</p>
-<p>其实<code>Pragma</code> 和 <code>Expires</code>这两个东西是http1.0时代时候用来禁止Cache的方法。当前时代几本已经木有了http1.0的踪影，但是为了防止一些客户端以及proxy仍然使用着http1.0的实现，我们不妨就加上了。</p>
+                    <h3 id="获取自定义的HTTP-HEADER-并验证"><a href="#获取自定义的HTTP-HEADER-并验证" class="headerlink" title="获取自定义的HTTP HEADER 并验证"></a>获取自定义的HTTP HEADER 并验证</h3><p>这个例子中我们利用Rack中间件去获取用户自定义的http header <code>gyorou_header</code> 然后进行验证。</p>
+<p>中间件的调用方法和Basic Auth 相似。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">use AuthHeader <span class="keyword">do</span> <span class="params">|authcode|</span></div><div class="line"> authcode == <span class="string">"set_from_app"</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>这个block会作为第二个参数传递给中间件的initialize方法。<br>我们可以在中间件的call方法中调用这个block。</p>
+<p>具体中间件内容如下。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">AuthHeader</span></span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(app，&amp;authentic)</span></span></div><div class="line">    @app = app</div><div class="line">    @authentic = authentic</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(env)</span></span></div><div class="line">    code = env[<span class="string">'HTTP_GYOROU_HEADER'</span>]</div><div class="line">    authorize(code) ? @app.call(env) : bad_request</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">authorize</span><span class="params">(authcode)</span></span></div><div class="line">    @authentic.call(authcode)</div><div class="line">  <span class="keyword">end</span></div><div class="line">  private</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">bad_request</span></span></div><div class="line">      <span class="keyword">return</span> [ <span class="number">400</span>,</div><div class="line">        &#123; <span class="string">'content_type'</span>=&gt; <span class="string">'text/plain'</span>,</div><div class="line">          <span class="string">'content_length'</span>=&gt; <span class="string">'0'</span> &#125;,</div><div class="line">        []</div><div class="line">      ]</div><div class="line">    <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>值得注意的是，<code>authorize(code) ? @app.call(env) : bad_request</code> 这里，当我们通过验证，则继续执行其他中间件，否则直接返回<code>bad_request</code>的结果。</p>
+<h3 id="添加返回给用户的HTTP-HEADER"><a href="#添加返回给用户的HTTP-HEADER" class="headerlink" title="添加返回给用户的HTTP HEADER"></a>添加返回给用户的HTTP HEADER</h3><p>有时候我们需要给一些response添加一些结果。比如如果request的是静态文件，我们添加一个<code>Access-Control-Allow-Origin</code>的head。<br>这个时候我们需要的是等其他中间件全部执行完之后修改response的结果。所以与验证header的写法有所不同。<br>具体参考 <a href="https://gist.github.com/ryanb/4157256" target="_blank" rel="external">https://gist.github.com/ryanb/4157256</a></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">AssetHeaders</span></span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(app)</span></span></div><div class="line">    @app = app</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(env)</span></span></div><div class="line">    request = Rack::Request.new(env)</div><div class="line">    response = @app.call(env)</div><div class="line">    <span class="keyword">if</span> request.path =~ <span class="regexp">/^\/assets\//</span></div><div class="line">      <span class="comment"># there maybe a better way to add headers</span></div><div class="line">      response[<span class="number">1</span>][<span class="string">"Access-Control-Allow-Origin"</span>] = <span class="string">"*"</span></div><div class="line">    <span class="keyword">end</span></div><div class="line">    response</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line">Railscasts::Application.configure <span class="keyword">do</span></div><div class="line">  config.middleware.use <span class="string">"AssetHeaders"</span></div><div class="line">  <span class="comment"># ...</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>这里先执行了<code>@app.call(env)</code>然后根据request的内容适当添加结果。</p>
+<p>Rack的常用方法还有很多，慢慢总结吧。</p>
 
                     
                         
@@ -224,7 +229,7 @@
                     
                     
                         <p>
-                            <a href="/2016/03/12/20160312/#post-footer" class="postShorten-excerpt_link link">
+                            <a href="/2016/09/22/20160922/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
@@ -244,6 +249,7 @@
 </div>
 
 </section>
+
 
 
                 <footer id="footer" class="main-content-wrap">

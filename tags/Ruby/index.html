@@ -194,13 +194,65 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/09/22/20160922/">
+                            Rack MiddleWare In and Out
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Thu Sep 22 2016 03:59:57 GMT+0000">
+	
+		    9月 22, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <h3 id="获取自定义的HTTP-HEADER-并验证"><a href="#获取自定义的HTTP-HEADER-并验证" class="headerlink" title="获取自定义的HTTP HEADER 并验证"></a>获取自定义的HTTP HEADER 并验证</h3><p>这个例子中我们利用Rack中间件去获取用户自定义的http header <code>gyorou_header</code> 然后进行验证。</p>
+<p>中间件的调用方法和Basic Auth 相似。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">use AuthHeader <span class="keyword">do</span> <span class="params">|authcode|</span></div><div class="line"> authcode == <span class="string">"set_from_app"</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>这个block会作为第二个参数传递给中间件的initialize方法。<br>我们可以在中间件的call方法中调用这个block。</p>
+<p>具体中间件内容如下。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">AuthHeader</span></span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(app，&amp;authentic)</span></span></div><div class="line">    @app = app</div><div class="line">    @authentic = authentic</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(env)</span></span></div><div class="line">    code = env[<span class="string">'HTTP_GYOROU_HEADER'</span>]</div><div class="line">    authorize(code) ? @app.call(env) : bad_request</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">authorize</span><span class="params">(authcode)</span></span></div><div class="line">    @authentic.call(authcode)</div><div class="line">  <span class="keyword">end</span></div><div class="line">  private</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">bad_request</span></span></div><div class="line">      <span class="keyword">return</span> [ <span class="number">400</span>,</div><div class="line">        &#123; <span class="string">'content_type'</span>=&gt; <span class="string">'text/plain'</span>,</div><div class="line">          <span class="string">'content_length'</span>=&gt; <span class="string">'0'</span> &#125;,</div><div class="line">        []</div><div class="line">      ]</div><div class="line">    <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>值得注意的是，<code>authorize(code) ? @app.call(env) : bad_request</code> 这里，当我们通过验证，则继续执行其他中间件，否则直接返回<code>bad_request</code>的结果。</p>
+<h3 id="添加返回给用户的HTTP-HEADER"><a href="#添加返回给用户的HTTP-HEADER" class="headerlink" title="添加返回给用户的HTTP HEADER"></a>添加返回给用户的HTTP HEADER</h3><p>有时候我们需要给一些response添加一些结果。比如如果request的是静态文件，我们添加一个<code>Access-Control-Allow-Origin</code>的head。<br>这个时候我们需要的是等其他中间件全部执行完之后修改response的结果。所以与验证header的写法有所不同。<br>具体参考 <a href="https://gist.github.com/ryanb/4157256" target="_blank" rel="external">https://gist.github.com/ryanb/4157256</a></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">AssetHeaders</span></span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(app)</span></span></div><div class="line">    @app = app</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(env)</span></span></div><div class="line">    request = Rack::Request.new(env)</div><div class="line">    response = @app.call(env)</div><div class="line">    <span class="keyword">if</span> request.path =~ <span class="regexp">/^\/assets\//</span></div><div class="line">      <span class="comment"># there maybe a better way to add headers</span></div><div class="line">      response[<span class="number">1</span>][<span class="string">"Access-Control-Allow-Origin"</span>] = <span class="string">"*"</span></div><div class="line">    <span class="keyword">end</span></div><div class="line">    response</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line">Railscasts::Application.configure <span class="keyword">do</span></div><div class="line">  config.middleware.use <span class="string">"AssetHeaders"</span></div><div class="line">  <span class="comment"># ...</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>这里先执行了<code>@app.call(env)</code>然后根据request的内容适当添加结果。</p>
+<p>Rack的常用方法还有很多，慢慢总结吧。</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/09/22/20160922/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/05/31/20160531-md/">
                             rack 中间件 warden 的机制
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue May 31 2016 22:37:52 GMT+0900">
+    <time itemprop="datePublished" content="Tue May 31 2016 13:37:52 GMT+0000">
 	
 		    5月 31, 2016
     	
@@ -274,7 +326,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Apr 02 2016 19:42:13 GMT+0900">
+    <time itemprop="datePublished" content="Sat Apr 02 2016 10:42:13 GMT+0000">
 	
 		    4月 02, 2016
     	
@@ -329,7 +381,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue Mar 15 2016 23:07:05 GMT+0900">
+    <time itemprop="datePublished" content="Tue Mar 15 2016 14:07:05 GMT+0000">
 	
 		    3月 15, 2016
     	
@@ -388,7 +440,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 14 2016 22:08:07 GMT+0900">
+    <time itemprop="datePublished" content="Sun Feb 14 2016 13:08:07 GMT+0000">
 	
 		    2月 14, 2016
     	
@@ -452,7 +504,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Feb 13 2016 16:54:12 GMT+0900">
+    <time itemprop="datePublished" content="Sat Feb 13 2016 07:54:12 GMT+0000">
 	
 		    2月 13, 2016
     	
