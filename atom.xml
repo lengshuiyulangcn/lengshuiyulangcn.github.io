@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.bocchi.tokyo/"/>
-  <updated>2016-09-22T04:00:43.000Z</updated>
+  <updated>2016-10-02T13:10:54.000Z</updated>
   <id>http://blog.bocchi.tokyo/</id>
   
   <author>
@@ -14,6 +14,59 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>没有干劲的周末以及 Electron</title>
+    <link href="http://blog.bocchi.tokyo/2016/10/02/20161002/"/>
+    <id>http://blog.bocchi.tokyo/2016/10/02/20161002/</id>
+    <published>2016-10-02T13:09:40.000Z</published>
+    <updated>2016-10-02T13:10:54.000Z</updated>
+    
+    <content type="html">&lt;p&gt;周末抽时间看了一下时下很火的Electron。&lt;br&gt;Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。&lt;br&gt;通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。&lt;/p&gt;
+&lt;p&gt;和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。&lt;br&gt;Electron 通过 CSS/JS/HTML 来渲染UI， 而传统桌面应用使用OS提供的API。&lt;/p&gt;
+&lt;p&gt;大名鼎鼎的编辑器Atom就是基于Electron的跨平台应用。&lt;br&gt;其他比较有名的应用，比如Slack也是基于Electron。&lt;/p&gt;
+&lt;h3 id=&quot;quick-start&quot;&gt;&lt;a href=&quot;#quick-start&quot; class=&quot;headerlink&quot; title=&quot;quick-start&quot;&gt;&lt;/a&gt;quick-start&lt;/h3&gt;&lt;figure class=&quot;highlight crmsh&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Clone the repository&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ git &lt;span class=&quot;keyword&quot;&gt;clone&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;https&lt;/span&gt;://github.com/electron/electron-quick-&lt;span class=&quot;literal&quot;&gt;start&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Go into the repository&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ cd electron-quick-&lt;span class=&quot;literal&quot;&gt;start&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Install dependencies and run the app&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ npm install &amp;amp;&amp;amp; npm &lt;span class=&quot;literal&quot;&gt;start&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Electron的核心可以是一个&lt;code&gt;main.js&lt;/code&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight stylus&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;your-app/&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;├── package&lt;span class=&quot;selector-class&quot;&gt;.json&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;├── main&lt;span class=&quot;selector-class&quot;&gt;.js&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;└── index.html&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;code&gt;main.js&lt;/code&gt; 作为主进程，需要在其中创建一个窗口，将需要载入的页面载入该窗口中，绑定一系列监听时间来对用户的操作作出反应。&lt;/p&gt;
+&lt;figure class=&quot;highlight js&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;13&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;14&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;const&lt;/span&gt; &amp;#123;app, BrowserWindow&amp;#125; = &lt;span class=&quot;built_in&quot;&gt;require&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;&#39;electron&#39;&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;let&lt;/span&gt; win&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;win = &lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; BrowserWindow(&amp;#123;width: &lt;span class=&quot;number&quot;&gt;800&lt;/span&gt;, height: &lt;span class=&quot;number&quot;&gt;600&lt;/span&gt;&amp;#125;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; &lt;span class=&quot;comment&quot;&gt;// and load the index.html of the app.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; win.loadURL(&lt;span class=&quot;string&quot;&gt;`file://&lt;span class=&quot;subst&quot;&gt;$&amp;#123;__dirname&amp;#125;&lt;/span&gt;/index.html`&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; win.on(&lt;span class=&quot;string&quot;&gt;&#39;closed&#39;&lt;/span&gt;, () =&amp;gt; &amp;#123;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// Dereference the window object, usually you would store windows&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// in an array if your app supports multi windows, this is the time&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// when you should delete the corresponding element.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    win = &lt;span class=&quot;literal&quot;&gt;null&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &amp;#125;)&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;由于内容一目了然，具体我就不抄了。&lt;/p&gt;
+&lt;h3 id=&quot;能干什么&quot;&gt;&lt;a href=&quot;#能干什么&quot; class=&quot;headerlink&quot; title=&quot;能干什么&quot;&gt;&lt;/a&gt;能干什么&lt;/h3&gt;&lt;p&gt;基本的本地应用程序基本都能用Electron实现。现在间的比较多的有Markdown编辑器，文法高亮编辑器等等。&lt;br&gt;Markdown编辑器的思路很简单就是和网页上用Marked.js实现的完全一样，再附加保存到本地功能和从本地文件系统读取而已。&lt;br&gt;文法高亮编辑器配合JS的编辑器ACE，也就是多个本地读写的功能而已，这些都不用多说。&lt;/p&gt;
+&lt;p&gt;与http restful API交互可以使用&lt;code&gt;superagent&lt;/code&gt;之类的http客户端，实现复杂的UI也可以套用React和Redux以及其他一大波前端框架。&lt;/p&gt;
+&lt;p&gt;总之不管如何，Electron的本质其实就是获得了本地IO操作能力的Web APP。&lt;/p&gt;
+&lt;h3 id=&quot;没有干劲的周末&quot;&gt;&lt;a href=&quot;#没有干劲的周末&quot; class=&quot;headerlink&quot; title=&quot;没有干劲的周末&quot;&gt;&lt;/a&gt;没有干劲的周末&lt;/h3&gt;&lt;p&gt;大抵工作上不爽是最大的原因。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;十分讨厌PHP以及写得很屎的PHP。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;觉得周围很多人很蠢或者在混日子。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;工作的环境不适合自己的技术成长。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;觉得用户是傻逼。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;觉得工资太低。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;觉得把妹太难。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;我也是傻逼。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;还是趁机汲取为数不多的能学到的东西，找好下家吧。&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;周末抽时间看了一下时下很火的Electron。&lt;br&gt;Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。&lt;br&gt;通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。&lt;/p&gt;
+&lt;p&gt;和大部分桌面应
+    
+    </summary>
+    
+    
+      <category term="Electron" scheme="http://blog.bocchi.tokyo/tags/Electron/"/>
+    
+      <category term="Javascript" scheme="http://blog.bocchi.tokyo/tags/Javascript/"/>
+    
+  </entry>
   
   <entry>
     <title>Rack MiddleWare In and Out</title>
@@ -122,11 +175,11 @@
     
       <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
     
+      <category term="ActionCable" scheme="http://blog.bocchi.tokyo/tags/ActionCable/"/>
+    
       <category term="Redux" scheme="http://blog.bocchi.tokyo/tags/Redux/"/>
     
       <category term="React" scheme="http://blog.bocchi.tokyo/tags/React/"/>
-    
-      <category term="ActionCable" scheme="http://blog.bocchi.tokyo/tags/ActionCable/"/>
     
   </entry>
   
@@ -176,8 +229,8 @@
   
   <entry>
     <title>我们也许并不合适</title>
-    <link href="http://blog.bocchi.tokyo/2016/06/16/20160615/"/>
-    <id>http://blog.bocchi.tokyo/2016/06/16/20160615/</id>
+    <link href="http://blog.bocchi.tokyo/2016/06/15/20160615/"/>
+    <id>http://blog.bocchi.tokyo/2016/06/15/20160615/</id>
     <published>2016-06-15T15:40:06.000Z</published>
     <updated>2016-06-15T15:46:32.000Z</updated>
     
@@ -405,8 +458,8 @@
   
   <entry>
     <title>东京一年</title>
-    <link href="http://blog.bocchi.tokyo/2016/03/28/20160327/"/>
-    <id>http://blog.bocchi.tokyo/2016/03/28/20160327/</id>
+    <link href="http://blog.bocchi.tokyo/2016/03/27/20160327/"/>
+    <id>http://blog.bocchi.tokyo/2016/03/27/20160327/</id>
     <published>2016-03-27T15:49:34.000Z</published>
     <updated>2016-03-27T15:50:23.000Z</updated>
     
@@ -429,11 +482,11 @@
     </summary>
     
     
+      <category term="生活" scheme="http://blog.bocchi.tokyo/tags/%E7%94%9F%E6%B4%BB/"/>
+    
       <category term="毕业季" scheme="http://blog.bocchi.tokyo/tags/%E6%AF%95%E4%B8%9A%E5%AD%A3/"/>
     
       <category term="回忆" scheme="http://blog.bocchi.tokyo/tags/%E5%9B%9E%E5%BF%86/"/>
-    
-      <category term="生活" scheme="http://blog.bocchi.tokyo/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
@@ -706,54 +759,6 @@
     
     </summary>
     
-    
-  </entry>
-  
-  <entry>
-    <title>16年的圣瓦伦丁节</title>
-    <link href="http://blog.bocchi.tokyo/2016/02/14/2-14-day/"/>
-    <id>http://blog.bocchi.tokyo/2016/02/14/2-14-day/</id>
-    <published>2016-02-14T13:08:07.000Z</published>
-    <updated>2016-02-17T16:00:55.000Z</updated>
-    
-    <content type="html">&lt;p&gt;又是一年感恩节。昨晚久违玩游戏玩得太晚，爬起来才发现已经是午后。随便超市里买点垃圾食品吃了不知不觉又玩了一下午游戏…&lt;br&gt;终于还是被自己太烂的游戏技能以及胸中的罪恶感打败，背上电脑匆匆出门。外面好热，2月中旬的东京居然能有21度。&lt;/p&gt;
-&lt;p&gt;晃到星巴克才坐下，昨天debug了半天修复的问题，今天又有了相关的新问题。&lt;/p&gt;
-&lt;p&gt;还是从昨天的问题反省开始。&lt;/p&gt;
-&lt;p&gt;昨天的问题是monkey patch devise的method的地方忽略了strong parameter。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# app/model/user.rb&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;self&lt;/span&gt;.&lt;span class=&quot;title&quot;&gt;find_first_by_auth_conditions&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(warden_conditions)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  conditions = warden_conditions.dup&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; login = conditions.delete(&lt;span class=&quot;symbol&quot;&gt;:login&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    where(conditions).where([&lt;span class=&quot;string&quot;&gt;&quot;name = :value OR lower(email) = lower(:value)&quot;&lt;/span&gt;, &amp;#123; &lt;span class=&quot;symbol&quot;&gt;:value&lt;/span&gt; =&amp;gt; login &amp;#125;]).first&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    where(conditions.to_h).first&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;修复方法是给conditions套上strong parameter。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;self&lt;/span&gt;.&lt;span class=&quot;title&quot;&gt;find_first_by_auth_conditions&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(warden_conditions)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  conditions = warden_conditions.dup&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; login = conditions.delete(&lt;span class=&quot;symbol&quot;&gt;:login&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    where(conditions).where([&lt;span class=&quot;string&quot;&gt;&quot;name = :value OR lower(email) = lower(:value)&quot;&lt;/span&gt;, &amp;#123; &lt;span class=&quot;symbol&quot;&gt;:value&lt;/span&gt; =&amp;gt; login &amp;#125;]).first&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;# conditions should be converted to hash&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;   permitted_conditions = conditions.permit(&lt;span class=&quot;symbol&quot;&gt;:birthday&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:image&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:email&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:family_name&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:gender&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:role&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:given_name&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:phone&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:school&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:major&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:job&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:wechat&lt;/span&gt;,&lt;span class=&quot;symbol&quot;&gt;:line&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;   raise&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    where(permitted_conditions.to_h).first&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;邮件正常发送，但是，用户收到邮件点击重置密码的url，输入新密码确认提交之后，居然发生了&lt;code&gt;conditions没有permit方法&lt;/code&gt;的错误。&lt;br&gt;检查一下conditions是啥玩意儿。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;=&amp;gt; &amp;#123;&lt;span class=&quot;string&quot;&gt;&quot;reset_password_token&quot;&lt;/span&gt;=&amp;gt;&lt;span class=&quot;string&quot;&gt;&quot;6a108898d4ee931371c71d0e818472dfd0aa5b8ced6a22ed3add543844d50060&quot;&lt;/span&gt;&amp;#125;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; conditions.class&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;=&amp;gt; ActiveSupport::HashWithIndifferentAccess&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; conditions.class.ancestors&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;=&amp;gt; [ActiveSupport::HashWithIndifferentAccess, Hash, JSON::Ext::Generator::GeneratorMethods::Hash, Enumerable, Object, PP::ObjectMixin, ActiveSupport::Dependencies::Loadable, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;昨天的那个啥呢？&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; conditions.class.ancestors&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;=&amp;gt; [ActionController::Parameters, ActiveSupport::HashWithIndifferentAccess, Hash, JSON::Ext::Generator::GeneratorMethods::Hash, Enumerable, Object, PP::ObjectMixin, ActiveSupport::Dependencies::Loadable, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;原来&lt;code&gt;ActiveSupport::HashWithIndifferentAccess&lt;/code&gt;是 &lt;code&gt;ActionController::Parameters&lt;/code&gt;的父类。&lt;/p&gt;
-&lt;p&gt;而那些strong parameter的玩意儿，则是&lt;code&gt;ActionController::Parameters&lt;/code&gt;特有的。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; conditions.class.methods(false)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;=&amp;gt; [&lt;span class=&quot;symbol&quot;&gt;:permit_all_parameters&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:permit_all_parameters=&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:action_on_unpermitted_parameters&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:action_on_unpermitted_parameters=&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:always_permitted_parameters&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:always_permitted_parameters=&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:const_missing&lt;/span&gt;]&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;可是既然&lt;code&gt;ActiveSupport::HashWithIndifferentAccess&lt;/code&gt;不支持permit，那么我们该肿么办？&lt;/p&gt;
-&lt;h3 id=&quot;to-h-and-to-hash&quot;&gt;&lt;a href=&quot;#to-h-and-to-hash&quot; class=&quot;headerlink&quot; title=&quot;to_h and to_hash&quot;&gt;&lt;/a&gt;to_h and to_hash&lt;/h3&gt;&lt;p&gt;很有意思看到了这个ticket。&lt;code&gt;https://bugs.ruby-lang.org/issues/10180&lt;/code&gt;&lt;br&gt;挺有意思的是，to_h是Hash自带的方法，而然，通常当我们需要非显示得将object转换成hash的时候，&lt;br&gt;通常可以试一下to_hash这个方法。to_hash本身需要在后继的class中定义。够lucky的是，&lt;code&gt;ActiveSupport::HashWithIndifferentAccess&lt;/code&gt;中定义了&lt;code&gt;to_hash&lt;/code&gt;这个方法。&lt;/p&gt;
-&lt;p&gt;于是昨天和今天的问题综合起来可以如下解决。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# app/model/user.rb&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;self&lt;/span&gt;.&lt;span class=&quot;title&quot;&gt;find_first_by_auth_conditions&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(warden_conditions)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  conditions = warden_conditions.dup&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; login = conditions.delete(&lt;span class=&quot;symbol&quot;&gt;:login&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    where(conditions).where([&lt;span class=&quot;string&quot;&gt;&quot;name = :value OR lower(email) = lower(:value)&quot;&lt;/span&gt;, &amp;#123; &lt;span class=&quot;symbol&quot;&gt;:value&lt;/span&gt; =&amp;gt; login &amp;#125;]).first&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    where(conditions.to_hash).first&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;h3 id=&quot;validation-sucks&quot;&gt;&lt;a href=&quot;#validation-sucks&quot; class=&quot;headerlink&quot; title=&quot;validation sucks&quot;&gt;&lt;/a&gt;validation sucks&lt;/h3&gt;&lt;p&gt;其实调查这个问题之前我想到的是另一个问题，即用户修改密码的时候会出发validation， 然后因为仅仅修改密码而没提供其它filed的数值导致user的update失败。这个问题一直困扰了我很久。&lt;/p&gt;
-&lt;p&gt;但其实仔细一想，我们无非就需要override devise的修改用户密码的method，在重载的method中忽视validation。而不敢深入devise的源码则是硬伤。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;13&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;14&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;15&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# app/model/user.rb&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;reset_password!&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(new_password, new_password_confirmation)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;self&lt;/span&gt;.password = new_password&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;self&lt;/span&gt;.password_confirmation = new_password_confirmation&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  validates_presence_of     &lt;span class=&quot;symbol&quot;&gt;:password&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  validates_confirmation_of &lt;span class=&quot;symbol&quot;&gt;:password&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  validates_length_of       &lt;span class=&quot;symbol&quot;&gt;:password&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;within:&lt;/span&gt; Devise.password_length, &lt;span class=&quot;symbol&quot;&gt;allow_blank:&lt;/span&gt; &lt;span class=&quot;literal&quot;&gt;true&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; errors.empty?&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    clear_reset_password_token&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    after_password_reset&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    save(&lt;span class=&quot;symbol&quot;&gt;validate:&lt;/span&gt; &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;以上就跳过了修改密码时候的user validation。&lt;/p&gt;
-&lt;p&gt;想要成长为一个出色的开发者，显然光会使用信手拈来的工具还是不够的，但我们需要自己customize的时候，我们则需要敢于各种深入和修改。&lt;/p&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;又是一年感恩节。昨晚久违玩游戏玩得太晚，爬起来才发现已经是午后。随便超市里买点垃圾食品吃了不知不觉又玩了一下午游戏…&lt;br&gt;终于还是被自己太烂的游戏技能以及胸中的罪恶感打败，背上电脑匆匆出门。外面好热，2月中旬的东京居然能有21度。&lt;/p&gt;
-&lt;p&gt;晃到星巴克才坐下，昨天de
-    
-    </summary>
-    
-    
-      <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
-    
-      <category term="Devise" scheme="http://blog.bocchi.tokyo/tags/Devise/"/>
-    
-      <category term="Ruby" scheme="http://blog.bocchi.tokyo/tags/Ruby/"/>
     
   </entry>
   

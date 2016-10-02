@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Gyorouのぼっち日記">
-    <title>标签: Http - Gyorouのぼっち日記</title>
+    <title>归档: 2016/10 - Gyorouのぼっち日記</title>
     <meta name="author" content="Gyorou">
     
     
@@ -15,7 +15,7 @@
     
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Gyorouのぼっち日記">
-<meta property="og:url" content="http://blog.bocchi.tokyo/tags/Http/index.html">
+<meta property="og:url" content="http://blog.bocchi.tokyo/archives/2016/10/index.html">
 <meta property="og:site_name" content="Gyorouのぼっち日記">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gyorouのぼっち日記">
@@ -194,15 +194,15 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
-                        <a class="link-unstyled" href="/2016/03/12/20160312/">
-                            Prevent Browser from caching the page
+                        <a class="link-unstyled" href="/2016/10/02/20161002/">
+                            没有干劲的周末以及 Electron
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Mar 12 2016 06:04:47 GMT+0000">
+    <time itemprop="datePublished" content="Sun Oct 02 2016 13:09:40 GMT+0000">
 	
-		    3月 12, 2016
+		    10月 02, 2016
     	
     </time>
     
@@ -211,12 +211,36 @@
             
             
                 <div class="postShorten-content" itemprop="articleBody">
-                    <p>Browser Cache在大部分时候是很有用的。在大多数时候，Brower Cache可以减少对server发起request的次数减少server端的压力，以及给用户带来更流畅的体验。<br>但是有时候，我们却对Browser cache头疼不已。比如，当我们在当前页面使用ajax对页面进行了一些操作之后，转移到下一个页面，然后点击Browser的返回键返回上一个页面的时候，我们会很失望得发现我们用js进行的操作并没有及时反映。</p>
-<p>这个时候的对策则是在HTTP的headers里面强制写上不让Browser Cache的内容。在Rails中的实现方法可以是hook到<code>action_controller</code>中。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">### application_controller.rb</span></div><div class="line">private</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">set_cache_headers</span></span></div><div class="line">   response.headers[<span class="string">"Cache-Control"</span>] = <span class="string">"no-cache, no-store, max-age=0, must-revalidate"</span></div><div class="line">   response.headers[<span class="string">"Pragma"</span>] = <span class="string">"no-cache"</span></div><div class="line">   response.headers[<span class="string">"Expires"</span>] = <span class="string">"Fri, 01 Jan 1990 00:00:00 GMT"</span></div><div class="line"> <span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>这里增加了三个header。分别是<code>Cache-Control</code>, <code>Pragma</code> 以及 <code>Expires</code></p>
-<p>给<code>Expires</code> 设置一个过去的日期 和 <code>Cache-Control</code> 中设置 <code>max-age</code>其实是一回事。那么我们为什么要画蛇添足呢？</p>
-<p>其实<code>Pragma</code> 和 <code>Expires</code>这两个东西是http1.0时代时候用来禁止Cache的方法。当前时代几本已经木有了http1.0的踪影，但是为了防止一些客户端以及proxy仍然使用着http1.0的实现，我们不妨就加上了。</p>
+                    <p>周末抽时间看了一下时下很火的Electron。<br>Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。<br>通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。</p>
+<p>和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。<br>Electron 通过 CSS/JS/HTML 来渲染UI， 而传统桌面应用使用OS提供的API。</p>
+<p>大名鼎鼎的编辑器Atom就是基于Electron的跨平台应用。<br>其他比较有名的应用，比如Slack也是基于Electron。</p>
+<h3 id="quick-start"><a href="#quick-start" class="headerlink" title="quick-start"></a>quick-start</h3><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Clone the repository</span></div><div class="line">$ git <span class="keyword">clone</span> <span class="title">https</span>://github.com/electron/electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Go into the repository</span></div><div class="line">$ cd electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Install dependencies and run the app</span></div><div class="line">$ npm install &amp;&amp; npm <span class="literal">start</span></div></pre></td></tr></table></figure>
+<p>Electron的核心可以是一个<code>main.js</code></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">your-app/</div><div class="line">├── package<span class="selector-class">.json</span></div><div class="line">├── main<span class="selector-class">.js</span></div><div class="line">└── index.html</div></pre></td></tr></table></figure>
+<p><code>main.js</code> 作为主进程，需要在其中创建一个窗口，将需要载入的页面载入该窗口中，绑定一系列监听时间来对用户的操作作出反应。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> &#123;app, BrowserWindow&#125; = <span class="built_in">require</span>(<span class="string">'electron'</span>)</div><div class="line"></div><div class="line"><span class="keyword">let</span> win</div><div class="line">win = <span class="keyword">new</span> BrowserWindow(&#123;width: <span class="number">800</span>, height: <span class="number">600</span>&#125;)</div><div class="line"></div><div class="line"> <span class="comment">// and load the index.html of the app.</span></div><div class="line"> win.loadURL(<span class="string">`file://<span class="subst">$&#123;__dirname&#125;</span>/index.html`</span>)</div><div class="line"></div><div class="line"> win.on(<span class="string">'closed'</span>, () =&gt; &#123;</div><div class="line">    <span class="comment">// Dereference the window object, usually you would store windows</span></div><div class="line">    <span class="comment">// in an array if your app supports multi windows, this is the time</span></div><div class="line">    <span class="comment">// when you should delete the corresponding element.</span></div><div class="line">    win = <span class="literal">null</span></div><div class="line">  &#125;)</div></pre></td></tr></table></figure>
+<p>由于内容一目了然，具体我就不抄了。</p>
+<h3 id="能干什么"><a href="#能干什么" class="headerlink" title="能干什么"></a>能干什么</h3><p>基本的本地应用程序基本都能用Electron实现。现在间的比较多的有Markdown编辑器，文法高亮编辑器等等。<br>Markdown编辑器的思路很简单就是和网页上用Marked.js实现的完全一样，再附加保存到本地功能和从本地文件系统读取而已。<br>文法高亮编辑器配合JS的编辑器ACE，也就是多个本地读写的功能而已，这些都不用多说。</p>
+<p>与http restful API交互可以使用<code>superagent</code>之类的http客户端，实现复杂的UI也可以套用React和Redux以及其他一大波前端框架。</p>
+<p>总之不管如何，Electron的本质其实就是获得了本地IO操作能力的Web APP。</p>
+<h3 id="没有干劲的周末"><a href="#没有干劲的周末" class="headerlink" title="没有干劲的周末"></a>没有干劲的周末</h3><p>大抵工作上不爽是最大的原因。</p>
+<ul>
+<li><p>十分讨厌PHP以及写得很屎的PHP。</p>
+</li>
+<li><p>觉得周围很多人很蠢或者在混日子。</p>
+</li>
+<li><p>工作的环境不适合自己的技术成长。</p>
+</li>
+<li><p>觉得用户是傻逼。</p>
+</li>
+<li><p>觉得工资太低。</p>
+</li>
+<li><p>觉得把妹太难。</p>
+</li>
+<li><p>我也是傻逼。</p>
+</li>
+</ul>
+<p>还是趁机汲取为数不多的能学到的东西，找好下家吧。</p>
 
                     
                         
@@ -224,7 +248,7 @@
                     
                     
                         <p>
-                            <a href="/2016/03/12/20160312/#post-footer" class="postShorten-excerpt_link link">
+                            <a href="/2016/10/02/20161002/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
@@ -244,6 +268,7 @@
 </div>
 
 </section>
+
 
 
                 <footer id="footer" class="main-content-wrap">

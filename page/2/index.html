@@ -193,15 +193,70 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
-                        <a class="link-unstyled" href="/2016/03/28/20160327/">
+                        <a class="link-unstyled" href="/2016/04/02/20160402/">
+                            在樱花满开的周末阅读RubyChina 代码有感
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Sat Apr 02 2016 10:42:13 GMT+0000">
+	
+		    4月 02, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <p>终于天气预报说樱花满开了。周五晚上下了一夜雨，中午爬起看窗外，不幸中的万幸的阴天。<br>漠然坐在床边，翻看着facebook上的万年不变的更新，整理一下今天需要做的事情。<br>谁和谁成为了好友。<br>谁和谁今天开始交际。<br>谁对今天的什么活动感兴趣。<br>谁赞了谁的状态…</p>
+<p>今天该把<code>ruby-china</code>的源代码clone下来看一下，顺便在local跑一边。<br>safaribooks上堆积了几本书好歹翻一下决定是否继续看下去。<br>顺便不如去看看附近的樱花。</p>
+<p>大致如此吧。<br>抓起自从年末从札幌回来之后再也没摸过的相机，把macbook装进包里，洗脸刷牙，抓两把头发，匆匆出门。</p>
+<p>路上的樱花树并不多，胡乱来了两张发现相机也快没电了。随便吃了点垃圾，在站前的星巴克坐下，开始翻阅一下ruby-cina的源码。</p>
+<p><img src="/images/IMG_0240.jpg" alt=""><br><img src="/images/IMG_0247.jpg" alt=""><br><img src="/images/IMG_0250.jpg" alt=""></p>
+<h3 id="Ruby-china-的技术备忘"><a href="#Ruby-china-的技术备忘" class="headerlink" title="Ruby-china 的技术备忘"></a>Ruby-china 的技术备忘</h3><p>Ruby-china的代码感觉可读性很高，并且更新较为频繁，也用到了一些自己不熟悉的技术，首先还是先来整理一下这些平时不太接触的技术吧。</p>
+<h4 id="Elasticsearch"><a href="#Elasticsearch" class="headerlink" title="Elasticsearch"></a>Elasticsearch</h4><p>强大的站内搜索工具。配合ruby的wrapper<br><a href="https://github.com/elastic/elasticsearch-rails" target="_blank" rel="external">elasticsearch-rails</a>可以实现强大的全文搜索功能。感觉大抵和solr＋sunspot类似。另外对于中文搜索需要配合一些tokenizer。</p>
+<h4 id="Postgresql"><a href="#Postgresql" class="headerlink" title="Postgresql"></a>Postgresql</h4><p>虽然是关系型数据库，但是支持json。RubyChina之前使用mongodb，最近切换到了postgresql。</p>
+<h4 id="Actioncable"><a href="#Actioncable" class="headerlink" title="Actioncable"></a>Actioncable</h4><p>Rails 5的新特征。其实就是websocket的Rails实现。</p>
+<h4 id="second-level-cache"><a href="#second-level-cache" class="headerlink" title="second_level_cache"></a>second_level_cache</h4><p>很酷炫的一个gem。<a href="https://github.com/hooopo/second_level_cache" target="_blank" rel="external">second_level_cache</a>直接override了ActiveRecord的find方法，find方法的结果会直接被cache，但是不用担心，当发生update，delete，create等变化的时候，cache的内容也会相应得到变化。</p>
+<p>需要注意的是，这个gem的作者推荐大家使用dalli_store作为默认的store，这大概也是Ruby-china使用dalli_store的原因了。</p>
+<h4 id="rack-attack"><a href="#rack-attack" class="headerlink" title="rack-attack"></a>rack-attack</h4><p>纯引用。<code>Rack::Attack is a rack middleware to protect your web app from bad clients. It allows whitelisting, blacklisting, throttling, and tracking based on arbitrary properties of the request.</code></p>
+<h3 id="一些感想"><a href="#一些感想" class="headerlink" title="一些感想"></a>一些感想</h3><p>阅读ruby-china的源码让无聊枯燥的周末下午突然变得很有意思。<br>作为一个ruby开发者，再次深刻体会到ruby以及rails世界的深奥和广大。<br>当然ruby-china也有一些地方美中不足。<br>比如对cache依赖较多，而没有使用一些前段技术来提升用户体验和速度。<br>比如很多地方没有针对开发者的优化。<br>文档还不是十分完善，部署较为复杂，容易使得初学者望而生怯。</p>
+<p>to be continued…</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/04/02/20160402/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
+                        <a class="link-unstyled" href="/2016/03/27/20160327/">
                             东京一年
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Mon Mar 28 2016 00:49:34 GMT+0900">
+    <time itemprop="datePublished" content="Sun Mar 27 2016 15:49:34 GMT+0000">
 	
-		    3月 28, 2016
+		    3月 27, 2016
     	
     </time>
     
@@ -226,7 +281,7 @@
                     
                     
                         <p>
-                            <a href="/2016/03/28/20160327/#post-footer" class="postShorten-excerpt_link link">
+                            <a href="/2016/03/27/20160327/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
@@ -249,7 +304,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Mon Mar 21 2016 23:36:38 GMT+0900">
+    <time itemprop="datePublished" content="Mon Mar 21 2016 14:36:38 GMT+0000">
 	
 		    3月 21, 2016
     	
@@ -303,7 +358,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Mar 20 2016 13:48:42 GMT+0900">
+    <time itemprop="datePublished" content="Sun Mar 20 2016 04:48:42 GMT+0000">
 	
 		    3月 20, 2016
     	
@@ -373,7 +428,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue Mar 15 2016 23:07:05 GMT+0900">
+    <time itemprop="datePublished" content="Tue Mar 15 2016 14:07:05 GMT+0000">
 	
 		    3月 15, 2016
     	
@@ -432,7 +487,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Mar 12 2016 15:04:47 GMT+0900">
+    <time itemprop="datePublished" content="Sat Mar 12 2016 06:04:47 GMT+0000">
 	
 		    3月 12, 2016
     	
@@ -479,7 +534,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Mon Mar 07 2016 23:56:21 GMT+0900">
+    <time itemprop="datePublished" content="Mon Mar 07 2016 14:56:21 GMT+0000">
 	
 		    3月 07, 2016
     	
@@ -528,7 +583,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Mar 05 2016 16:44:08 GMT+0900">
+    <time itemprop="datePublished" content="Sat Mar 05 2016 07:44:08 GMT+0000">
 	
 		    3月 05, 2016
     	
@@ -577,7 +632,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 21 2016 17:34:51 GMT+0900">
+    <time itemprop="datePublished" content="Sun Feb 21 2016 08:34:51 GMT+0000">
 	
 		    2月 21, 2016
     	
@@ -626,7 +681,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Feb 17 2016 23:24:08 GMT+0900">
+    <time itemprop="datePublished" content="Wed Feb 17 2016 14:24:08 GMT+0000">
 	
 		    2月 17, 2016
     	
@@ -646,70 +701,6 @@
                     
                         <p>
                             <a href="/2016/02/17/转移/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/02/14/2-14-day/">
-                            16年的圣瓦伦丁节
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 14 2016 22:08:07 GMT+0900">
-	
-		    2月 14, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>又是一年感恩节。昨晚久违玩游戏玩得太晚，爬起来才发现已经是午后。随便超市里买点垃圾食品吃了不知不觉又玩了一下午游戏…<br>终于还是被自己太烂的游戏技能以及胸中的罪恶感打败，背上电脑匆匆出门。外面好热，2月中旬的东京居然能有21度。</p>
-<p>晃到星巴克才坐下，昨天debug了半天修复的问题，今天又有了相关的新问题。</p>
-<p>还是从昨天的问题反省开始。</p>
-<p>昨天的问题是monkey patch devise的method的地方忽略了strong parameter。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># app/model/user.rb</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">self</span>.<span class="title">find_first_by_auth_conditions</span><span class="params">(warden_conditions)</span></span></div><div class="line">  conditions = warden_conditions.dup</div><div class="line">  <span class="keyword">if</span> login = conditions.delete(<span class="symbol">:login</span>)</div><div class="line">    where(conditions).where([<span class="string">"name = :value OR lower(email) = lower(:value)"</span>, &#123; <span class="symbol">:value</span> =&gt; login &#125;]).first</div><div class="line">  <span class="keyword">else</span></div><div class="line">    where(conditions.to_h).first</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>修复方法是给conditions套上strong parameter。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">self</span>.<span class="title">find_first_by_auth_conditions</span><span class="params">(warden_conditions)</span></span></div><div class="line">  conditions = warden_conditions.dup</div><div class="line">  <span class="keyword">if</span> login = conditions.delete(<span class="symbol">:login</span>)</div><div class="line">    where(conditions).where([<span class="string">"name = :value OR lower(email) = lower(:value)"</span>, &#123; <span class="symbol">:value</span> =&gt; login &#125;]).first</div><div class="line">  <span class="keyword">else</span></div><div class="line">    <span class="comment"># conditions should be converted to hash</span></div><div class="line">   permitted_conditions = conditions.permit(<span class="symbol">:birthday</span>,<span class="symbol">:image</span>,<span class="symbol">:email</span>,<span class="symbol">:family_name</span>,<span class="symbol">:gender</span>,<span class="symbol">:role</span>,<span class="symbol">:given_name</span>,<span class="symbol">:phone</span>,<span class="symbol">:school</span>,<span class="symbol">:major</span>,<span class="symbol">:job</span>,<span class="symbol">:wechat</span>,<span class="symbol">:line</span>)</div><div class="line">   raise</div><div class="line">    where(permitted_conditions.to_h).first</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>邮件正常发送，但是，用户收到邮件点击重置密码的url，输入新密码确认提交之后，居然发生了<code>conditions没有permit方法</code>的错误。<br>检查一下conditions是啥玩意儿。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">=&gt; &#123;<span class="string">"reset_password_token"</span>=&gt;<span class="string">"6a108898d4ee931371c71d0e818472dfd0aa5b8ced6a22ed3add543844d50060"</span>&#125;</div><div class="line"><span class="meta">&gt;&gt;</span> conditions.class</div><div class="line">=&gt; ActiveSupport::HashWithIndifferentAccess</div><div class="line"><span class="meta">&gt;&gt;</span> conditions.class.ancestors</div><div class="line">=&gt; [ActiveSupport::HashWithIndifferentAccess, Hash, JSON::Ext::Generator::GeneratorMethods::Hash, Enumerable, Object, PP::ObjectMixin, ActiveSupport::Dependencies::Loadable, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]</div></pre></td></tr></table></figure>
-<p>昨天的那个啥呢？</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;</span> conditions.class.ancestors</div><div class="line">=&gt; [ActionController::Parameters, ActiveSupport::HashWithIndifferentAccess, Hash, JSON::Ext::Generator::GeneratorMethods::Hash, Enumerable, Object, PP::ObjectMixin, ActiveSupport::Dependencies::Loadable, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]</div></pre></td></tr></table></figure>
-<p>原来<code>ActiveSupport::HashWithIndifferentAccess</code>是 <code>ActionController::Parameters</code>的父类。</p>
-<p>而那些strong parameter的玩意儿，则是<code>ActionController::Parameters</code>特有的。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;</span> conditions.class.methods(false)</div><div class="line">=&gt; [<span class="symbol">:permit_all_parameters</span>, <span class="symbol">:permit_all_parameters=</span>, <span class="symbol">:action_on_unpermitted_parameters</span>, <span class="symbol">:action_on_unpermitted_parameters=</span>, <span class="symbol">:always_permitted_parameters</span>, <span class="symbol">:always_permitted_parameters=</span>, <span class="symbol">:const_missing</span>]</div></pre></td></tr></table></figure>
-<p>可是既然<code>ActiveSupport::HashWithIndifferentAccess</code>不支持permit，那么我们该肿么办？</p>
-<h3 id="to-h-and-to-hash"><a href="#to-h-and-to-hash" class="headerlink" title="to_h and to_hash"></a>to_h and to_hash</h3><p>很有意思看到了这个ticket。<code>https://bugs.ruby-lang.org/issues/10180</code><br>挺有意思的是，to_h是Hash自带的方法，而然，通常当我们需要非显示得将object转换成hash的时候，<br>通常可以试一下to_hash这个方法。to_hash本身需要在后继的class中定义。够lucky的是，<code>ActiveSupport::HashWithIndifferentAccess</code>中定义了<code>to_hash</code>这个方法。</p>
-<p>于是昨天和今天的问题综合起来可以如下解决。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># app/model/user.rb</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">self</span>.<span class="title">find_first_by_auth_conditions</span><span class="params">(warden_conditions)</span></span></div><div class="line">  conditions = warden_conditions.dup</div><div class="line">  <span class="keyword">if</span> login = conditions.delete(<span class="symbol">:login</span>)</div><div class="line">    where(conditions).where([<span class="string">"name = :value OR lower(email) = lower(:value)"</span>, &#123; <span class="symbol">:value</span> =&gt; login &#125;]).first</div><div class="line">  <span class="keyword">else</span></div><div class="line">    where(conditions.to_hash).first</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<h3 id="validation-sucks"><a href="#validation-sucks" class="headerlink" title="validation sucks"></a>validation sucks</h3><p>其实调查这个问题之前我想到的是另一个问题，即用户修改密码的时候会出发validation， 然后因为仅仅修改密码而没提供其它filed的数值导致user的update失败。这个问题一直困扰了我很久。</p>
-<p>但其实仔细一想，我们无非就需要override devise的修改用户密码的method，在重载的method中忽视validation。而不敢深入devise的源码则是硬伤。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># app/model/user.rb</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">reset_password!</span><span class="params">(new_password, new_password_confirmation)</span></span></div><div class="line">  <span class="keyword">self</span>.password = new_password</div><div class="line">  <span class="keyword">self</span>.password_confirmation = new_password_confirmation</div><div class="line"></div><div class="line">  validates_presence_of     <span class="symbol">:password</span></div><div class="line">  validates_confirmation_of <span class="symbol">:password</span></div><div class="line">  validates_length_of       <span class="symbol">:password</span>, <span class="symbol">within:</span> Devise.password_length, <span class="symbol">allow_blank:</span> <span class="literal">true</span></div><div class="line"></div><div class="line">  <span class="keyword">if</span> errors.empty?</div><div class="line">    clear_reset_password_token</div><div class="line">    after_password_reset</div><div class="line">    save(<span class="symbol">validate:</span> <span class="literal">false</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>以上就跳过了修改密码时候的user validation。</p>
-<p>想要成长为一个出色的开发者，显然光会使用信手拈来的工具还是不够的，但我们需要自己customize的时候，我们则需要敢于各种深入和修改。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/02/14/2-14-day/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>

@@ -193,13 +193,84 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/10/02/20161002/">
+                            没有干劲的周末以及 Electron
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Sun Oct 02 2016 13:09:40 GMT+0000">
+	
+		    10月 02, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <p>周末抽时间看了一下时下很火的Electron。<br>Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。<br>通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。</p>
+<p>和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。<br>Electron 通过 CSS/JS/HTML 来渲染UI， 而传统桌面应用使用OS提供的API。</p>
+<p>大名鼎鼎的编辑器Atom就是基于Electron的跨平台应用。<br>其他比较有名的应用，比如Slack也是基于Electron。</p>
+<h3 id="quick-start"><a href="#quick-start" class="headerlink" title="quick-start"></a>quick-start</h3><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Clone the repository</span></div><div class="line">$ git <span class="keyword">clone</span> <span class="title">https</span>://github.com/electron/electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Go into the repository</span></div><div class="line">$ cd electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Install dependencies and run the app</span></div><div class="line">$ npm install &amp;&amp; npm <span class="literal">start</span></div></pre></td></tr></table></figure>
+<p>Electron的核心可以是一个<code>main.js</code></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">your-app/</div><div class="line">├── package<span class="selector-class">.json</span></div><div class="line">├── main<span class="selector-class">.js</span></div><div class="line">└── index.html</div></pre></td></tr></table></figure>
+<p><code>main.js</code> 作为主进程，需要在其中创建一个窗口，将需要载入的页面载入该窗口中，绑定一系列监听时间来对用户的操作作出反应。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> &#123;app, BrowserWindow&#125; = <span class="built_in">require</span>(<span class="string">'electron'</span>)</div><div class="line"></div><div class="line"><span class="keyword">let</span> win</div><div class="line">win = <span class="keyword">new</span> BrowserWindow(&#123;width: <span class="number">800</span>, height: <span class="number">600</span>&#125;)</div><div class="line"></div><div class="line"> <span class="comment">// and load the index.html of the app.</span></div><div class="line"> win.loadURL(<span class="string">`file://<span class="subst">$&#123;__dirname&#125;</span>/index.html`</span>)</div><div class="line"></div><div class="line"> win.on(<span class="string">'closed'</span>, () =&gt; &#123;</div><div class="line">    <span class="comment">// Dereference the window object, usually you would store windows</span></div><div class="line">    <span class="comment">// in an array if your app supports multi windows, this is the time</span></div><div class="line">    <span class="comment">// when you should delete the corresponding element.</span></div><div class="line">    win = <span class="literal">null</span></div><div class="line">  &#125;)</div></pre></td></tr></table></figure>
+<p>由于内容一目了然，具体我就不抄了。</p>
+<h3 id="能干什么"><a href="#能干什么" class="headerlink" title="能干什么"></a>能干什么</h3><p>基本的本地应用程序基本都能用Electron实现。现在间的比较多的有Markdown编辑器，文法高亮编辑器等等。<br>Markdown编辑器的思路很简单就是和网页上用Marked.js实现的完全一样，再附加保存到本地功能和从本地文件系统读取而已。<br>文法高亮编辑器配合JS的编辑器ACE，也就是多个本地读写的功能而已，这些都不用多说。</p>
+<p>与http restful API交互可以使用<code>superagent</code>之类的http客户端，实现复杂的UI也可以套用React和Redux以及其他一大波前端框架。</p>
+<p>总之不管如何，Electron的本质其实就是获得了本地IO操作能力的Web APP。</p>
+<h3 id="没有干劲的周末"><a href="#没有干劲的周末" class="headerlink" title="没有干劲的周末"></a>没有干劲的周末</h3><p>大抵工作上不爽是最大的原因。</p>
+<ul>
+<li><p>十分讨厌PHP以及写得很屎的PHP。</p>
+</li>
+<li><p>觉得周围很多人很蠢或者在混日子。</p>
+</li>
+<li><p>工作的环境不适合自己的技术成长。</p>
+</li>
+<li><p>觉得用户是傻逼。</p>
+</li>
+<li><p>觉得工资太低。</p>
+</li>
+<li><p>觉得把妹太难。</p>
+</li>
+<li><p>我也是傻逼。</p>
+</li>
+</ul>
+<p>还是趁机汲取为数不多的能学到的东西，找好下家吧。</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/10/02/20161002/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/09/22/20160922/">
                             Rack MiddleWare In and Out
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Sep 22 2016 12:59:57 GMT+0900">
+    <time itemprop="datePublished" content="Thu Sep 22 2016 03:59:57 GMT+0000">
 	
 		    9月 22, 2016
     	
@@ -251,7 +322,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 10 2016 19:42:35 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jul 10 2016 10:42:35 GMT+0000">
 	
 		    7月 10, 2016
     	
@@ -314,7 +385,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 03 2016 22:06:28 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jul 03 2016 13:06:28 GMT+0000">
 	
 		    7月 03, 2016
     	
@@ -367,7 +438,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 26 2016 18:32:22 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jun 26 2016 09:32:22 GMT+0000">
 	
 		    6月 26, 2016
     	
@@ -421,15 +492,15 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
-                        <a class="link-unstyled" href="/2016/06/16/20160615/">
+                        <a class="link-unstyled" href="/2016/06/15/20160615/">
                             我们也许并不合适
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Jun 16 2016 00:40:06 GMT+0900">
+    <time itemprop="datePublished" content="Wed Jun 15 2016 15:40:06 GMT+0000">
 	
-		    6月 16, 2016
+		    6月 15, 2016
     	
     </time>
     
@@ -455,7 +526,7 @@
                     
                     
                         <p>
-                            <a href="/2016/06/16/20160615/#post-footer" class="postShorten-excerpt_link link">
+                            <a href="/2016/06/15/20160615/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
@@ -478,7 +549,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 05 2016 21:28:51 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jun 05 2016 12:28:51 GMT+0000">
 	
 		    6月 05, 2016
     	
@@ -541,7 +612,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue May 31 2016 22:37:52 GMT+0900">
+    <time itemprop="datePublished" content="Tue May 31 2016 13:37:52 GMT+0000">
 	
 		    5月 31, 2016
     	
@@ -615,7 +686,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat May 14 2016 19:38:31 GMT+0900">
+    <time itemprop="datePublished" content="Sat May 14 2016 10:38:31 GMT+0000">
 	
 		    5月 14, 2016
     	
@@ -660,7 +731,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Apr 07 2016 23:58:22 GMT+0900">
+    <time itemprop="datePublished" content="Thu Apr 07 2016 14:58:22 GMT+0000">
 	
 		    4月 07, 2016
     	
@@ -694,61 +765,6 @@
                     
                         <p>
                             <a href="/2016/04/07/20160407/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/04/02/20160402/">
-                            在樱花满开的周末阅读RubyChina 代码有感
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Apr 02 2016 19:42:13 GMT+0900">
-	
-		    4月 02, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>终于天气预报说樱花满开了。周五晚上下了一夜雨，中午爬起看窗外，不幸中的万幸的阴天。<br>漠然坐在床边，翻看着facebook上的万年不变的更新，整理一下今天需要做的事情。<br>谁和谁成为了好友。<br>谁和谁今天开始交际。<br>谁对今天的什么活动感兴趣。<br>谁赞了谁的状态…</p>
-<p>今天该把<code>ruby-china</code>的源代码clone下来看一下，顺便在local跑一边。<br>safaribooks上堆积了几本书好歹翻一下决定是否继续看下去。<br>顺便不如去看看附近的樱花。</p>
-<p>大致如此吧。<br>抓起自从年末从札幌回来之后再也没摸过的相机，把macbook装进包里，洗脸刷牙，抓两把头发，匆匆出门。</p>
-<p>路上的樱花树并不多，胡乱来了两张发现相机也快没电了。随便吃了点垃圾，在站前的星巴克坐下，开始翻阅一下ruby-cina的源码。</p>
-<p><img src="/images/IMG_0240.jpg" alt=""><br><img src="/images/IMG_0247.jpg" alt=""><br><img src="/images/IMG_0250.jpg" alt=""></p>
-<h3 id="Ruby-china-的技术备忘"><a href="#Ruby-china-的技术备忘" class="headerlink" title="Ruby-china 的技术备忘"></a>Ruby-china 的技术备忘</h3><p>Ruby-china的代码感觉可读性很高，并且更新较为频繁，也用到了一些自己不熟悉的技术，首先还是先来整理一下这些平时不太接触的技术吧。</p>
-<h4 id="Elasticsearch"><a href="#Elasticsearch" class="headerlink" title="Elasticsearch"></a>Elasticsearch</h4><p>强大的站内搜索工具。配合ruby的wrapper<br><a href="https://github.com/elastic/elasticsearch-rails" target="_blank" rel="external">elasticsearch-rails</a>可以实现强大的全文搜索功能。感觉大抵和solr＋sunspot类似。另外对于中文搜索需要配合一些tokenizer。</p>
-<h4 id="Postgresql"><a href="#Postgresql" class="headerlink" title="Postgresql"></a>Postgresql</h4><p>虽然是关系型数据库，但是支持json。RubyChina之前使用mongodb，最近切换到了postgresql。</p>
-<h4 id="Actioncable"><a href="#Actioncable" class="headerlink" title="Actioncable"></a>Actioncable</h4><p>Rails 5的新特征。其实就是websocket的Rails实现。</p>
-<h4 id="second-level-cache"><a href="#second-level-cache" class="headerlink" title="second_level_cache"></a>second_level_cache</h4><p>很酷炫的一个gem。<a href="https://github.com/hooopo/second_level_cache" target="_blank" rel="external">second_level_cache</a>直接override了ActiveRecord的find方法，find方法的结果会直接被cache，但是不用担心，当发生update，delete，create等变化的时候，cache的内容也会相应得到变化。</p>
-<p>需要注意的是，这个gem的作者推荐大家使用dalli_store作为默认的store，这大概也是Ruby-china使用dalli_store的原因了。</p>
-<h4 id="rack-attack"><a href="#rack-attack" class="headerlink" title="rack-attack"></a>rack-attack</h4><p>纯引用。<code>Rack::Attack is a rack middleware to protect your web app from bad clients. It allows whitelisting, blacklisting, throttling, and tracking based on arbitrary properties of the request.</code></p>
-<h3 id="一些感想"><a href="#一些感想" class="headerlink" title="一些感想"></a>一些感想</h3><p>阅读ruby-china的源码让无聊枯燥的周末下午突然变得很有意思。<br>作为一个ruby开发者，再次深刻体会到ruby以及rails世界的深奥和广大。<br>当然ruby-china也有一些地方美中不足。<br>比如对cache依赖较多，而没有使用一些前段技术来提升用户体验和速度。<br>比如很多地方没有针对开发者的优化。<br>文档还不是十分完善，部署较为复杂，容易使得初学者望而生怯。</p>
-<p>to be continued…</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/04/02/20160402/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>

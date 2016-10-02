@@ -6,26 +6,26 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Gyorouのぼっち日記">
-    <title>使用devise进行用户验证后的post redirect - Gyorouのぼっち日記</title>
+    <title>没有干劲的周末以及 Electron - Gyorouのぼっち日記</title>
     <meta name="author" content="Gyorou">
     
     
     
         <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
     
-    <meta name="description" content="有些时候我们想要实现当未登录用户点击报名某个活动的时候，能够跳转到登录界面，输入正确的用户信息之后直接跳转回来，并已经完成报名。把思路理一下就是需要在登录之后redirect到一个post方法。那在Rails中使用devise做user auth的时候，如何实现呢？
-首先Rails根本不支持post的redirect。于是我们别做梦了，老老实实修改user case？嘛其实这个问题，当我们想千方百">
+    <meta name="description" content="周末抽时间看了一下时下很火的Electron。Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。
+和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。Electron 通过 CSS/JS/HTM">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="使用devise进行用户验证后的post redirect">
-<meta property="og:url" content="http://blog.bocchi.tokyo/2016/03/07/20160307/index.html">
+<meta property="og:title" content="没有干劲的周末以及 Electron">
+<meta property="og:url" content="http://blog.bocchi.tokyo/2016/10/02/20161002/index.html">
 <meta property="og:site_name" content="Gyorouのぼっち日記">
-<meta property="og:description" content="有些时候我们想要实现当未登录用户点击报名某个活动的时候，能够跳转到登录界面，输入正确的用户信息之后直接跳转回来，并已经完成报名。把思路理一下就是需要在登录之后redirect到一个post方法。那在Rails中使用devise做user auth的时候，如何实现呢？
-首先Rails根本不支持post的redirect。于是我们别做梦了，老老实实修改user case？嘛其实这个问题，当我们想千方百">
-<meta property="og:updated_time" content="2016-03-07T14:58:51.000Z">
+<meta property="og:description" content="周末抽时间看了一下时下很火的Electron。Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。
+和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。Electron 通过 CSS/JS/HTM">
+<meta property="og:updated_time" content="2016-10-02T13:10:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="使用devise进行用户验证后的post redirect">
-<meta name="twitter:description" content="有些时候我们想要实现当未登录用户点击报名某个活动的时候，能够跳转到登录界面，输入正确的用户信息之后直接跳转回来，并已经完成报名。把思路理一下就是需要在登录之后redirect到一个post方法。那在Rails中使用devise做user auth的时候，如何实现呢？
-首先Rails根本不支持post的redirect。于是我们别做梦了，老老实实修改user case？嘛其实这个问题，当我们想千方百">
+<meta name="twitter:title" content="没有干劲的周末以及 Electron">
+<meta name="twitter:description" content="周末抽时间看了一下时下很火的Electron。Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。
+和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。Electron 通过 CSS/JS/HTM">
     
     
         
@@ -197,13 +197,13 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title" itemprop="headline">
-            使用devise进行用户验证后的post redirect
+            没有干劲的周末以及 Electron
         </h1>
     
     <div class="post-meta">
-    <time itemprop="datePublished" content="Mon Mar 07 2016 14:56:21 GMT+0000">
+    <time itemprop="datePublished" content="Sun Oct 02 2016 13:09:40 GMT+0000">
 	
-		    3月 07, 2016
+		    10月 02, 2016
     	
     </time>
     
@@ -212,14 +212,36 @@
     
     <div class="post-content markdown" itemprop="articleBody">
         <div class="main-content-wrap">
-            <p>有些时候我们想要实现当未登录用户点击报名某个活动的时候，能够跳转到登录界面，输入正确的用户信息之后直接跳转回来，并已经完成报名。<br>把思路理一下就是需要在登录之后redirect到一个post方法。<br>那在Rails中使用devise做user auth的时候，如何实现呢？</p>
-<p>首先Rails根本不支持post的redirect。于是我们别做梦了，老老实实修改user case？<br>嘛其实这个问题，当我们想千方百计redirect回原来的post方法的时候就已经把自己设计套死了。</p>
-<p>重新审视一下我们的要求，很简单，就是要在点击报名之后，如果未登录，则跳转登录，然后登录之后自动完成报名。<br>之前的post方法也只不过是我们在用户已经登录的情况下完成报名的一种手段而已罢了。<br>我们完全可以在登录之后顺便将报名情况写进数据库，然后跳转回原来报名链接所在的页面，这样也就和报名无异了。<br>而报名所需要的event id以及报名链接所在页面的url就直接存入session即可。</p>
-<p>devise允许我们customize。所以这次我们直接重载devise 的session controller。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Users::SessionsController</span> &lt; Devise::SessionsController</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">create</span></span></div><div class="line">    <span class="keyword">self</span>.resource = warden.authenticate!(auth_options)</div><div class="line">    set_flash_message(<span class="symbol">:notice</span>, <span class="symbol">:signed_in</span>)</div><div class="line">    sign_in(resource_name, resource)</div><div class="line">    <span class="keyword">yield</span> resource <span class="keyword">if</span> block_given?</div><div class="line">    <span class="keyword">if</span> session[<span class="symbol">:event_id</span>]</div><div class="line">      apply_event</div><div class="line">      <span class="keyword">return</span></div><div class="line">    <span class="keyword">else</span></div><div class="line">      respond_with resource, <span class="symbol">location:</span> after_sign_in_path_for(resource)</div><div class="line">    <span class="keyword">end</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  private</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">apply_event</span></span></div><div class="line">    event_id = session.delete(<span class="symbol">:event_id</span>)</div><div class="line">    <span class="comment"># create and write into db</span></div><div class="line">    <span class="comment">#....</span></div><div class="line">    redirect_to event_detail_path(event_id)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>当然别忘了在<code>router</code>的config中加入重载的配置。</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">devise_for <span class="symbol">:users</span>, <span class="symbol">:controllers</span> =&gt; &#123; <span class="symbol">:sessions</span> =&gt; <span class="string">'users/sessions'</span> &#125;</div></pre></td></tr></table></figure>
-<p>果然还是应该冷静下来后退几步。</p>
+            <p>周末抽时间看了一下时下很火的Electron。<br>Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。<br>通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。</p>
+<p>和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。<br>Electron 通过 CSS/JS/HTML 来渲染UI， 而传统桌面应用使用OS提供的API。</p>
+<p>大名鼎鼎的编辑器Atom就是基于Electron的跨平台应用。<br>其他比较有名的应用，比如Slack也是基于Electron。</p>
+<h3 id="quick-start"><a href="#quick-start" class="headerlink" title="quick-start"></a>quick-start</h3><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Clone the repository</span></div><div class="line">$ git <span class="keyword">clone</span> <span class="title">https</span>://github.com/electron/electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Go into the repository</span></div><div class="line">$ cd electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Install dependencies and run the app</span></div><div class="line">$ npm install &amp;&amp; npm <span class="literal">start</span></div></pre></td></tr></table></figure>
+<p>Electron的核心可以是一个<code>main.js</code></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">your-app/</div><div class="line">├── package<span class="selector-class">.json</span></div><div class="line">├── main<span class="selector-class">.js</span></div><div class="line">└── index.html</div></pre></td></tr></table></figure>
+<p><code>main.js</code> 作为主进程，需要在其中创建一个窗口，将需要载入的页面载入该窗口中，绑定一系列监听时间来对用户的操作作出反应。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> &#123;app, BrowserWindow&#125; = <span class="built_in">require</span>(<span class="string">'electron'</span>)</div><div class="line"></div><div class="line"><span class="keyword">let</span> win</div><div class="line">win = <span class="keyword">new</span> BrowserWindow(&#123;width: <span class="number">800</span>, height: <span class="number">600</span>&#125;)</div><div class="line"></div><div class="line"> <span class="comment">// and load the index.html of the app.</span></div><div class="line"> win.loadURL(<span class="string">`file://<span class="subst">$&#123;__dirname&#125;</span>/index.html`</span>)</div><div class="line"></div><div class="line"> win.on(<span class="string">'closed'</span>, () =&gt; &#123;</div><div class="line">    <span class="comment">// Dereference the window object, usually you would store windows</span></div><div class="line">    <span class="comment">// in an array if your app supports multi windows, this is the time</span></div><div class="line">    <span class="comment">// when you should delete the corresponding element.</span></div><div class="line">    win = <span class="literal">null</span></div><div class="line">  &#125;)</div></pre></td></tr></table></figure>
+<p>由于内容一目了然，具体我就不抄了。</p>
+<h3 id="能干什么"><a href="#能干什么" class="headerlink" title="能干什么"></a>能干什么</h3><p>基本的本地应用程序基本都能用Electron实现。现在间的比较多的有Markdown编辑器，文法高亮编辑器等等。<br>Markdown编辑器的思路很简单就是和网页上用Marked.js实现的完全一样，再附加保存到本地功能和从本地文件系统读取而已。<br>文法高亮编辑器配合JS的编辑器ACE，也就是多个本地读写的功能而已，这些都不用多说。</p>
+<p>与http restful API交互可以使用<code>superagent</code>之类的http客户端，实现复杂的UI也可以套用React和Redux以及其他一大波前端框架。</p>
+<p>总之不管如何，Electron的本质其实就是获得了本地IO操作能力的Web APP。</p>
+<h3 id="没有干劲的周末"><a href="#没有干劲的周末" class="headerlink" title="没有干劲的周末"></a>没有干劲的周末</h3><p>大抵工作上不爽是最大的原因。</p>
+<ul>
+<li><p>十分讨厌PHP以及写得很屎的PHP。</p>
+</li>
+<li><p>觉得周围很多人很蠢或者在混日子。</p>
+</li>
+<li><p>工作的环境不适合自己的技术成长。</p>
+</li>
+<li><p>觉得用户是傻逼。</p>
+</li>
+<li><p>觉得工资太低。</p>
+</li>
+<li><p>觉得把妹太难。</p>
+</li>
+<li><p>我也是傻逼。</p>
+</li>
+</ul>
+<p>还是趁机汲取为数不多的能学到的东西，找好下家吧。</p>
 
             
                 
@@ -232,7 +254,7 @@
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">标签</span><br/>
                 
-    <a class="tag tag--primary tag--small t-link" href="/tags/Devise/">Devise</a> <a class="tag tag--primary tag--small t-link" href="/tags/Rails/">Rails</a>
+    <a class="tag tag--primary tag--small t-link" href="/tags/Electron/">Electron</a> <a class="tag tag--primary tag--small t-link" href="/tags/Javascript/">Javascript</a>
 
             </div>
         
@@ -241,7 +263,7 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/03/12/20160312/"  data-tooltip="Prevent Browser from caching the page">
+                    <a class="post-action-btn btn btn--disabled">
                 
                     <i class="fa fa-angle-left"></i>
                     <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
@@ -249,7 +271,7 @@
             </li>
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/03/05/20160305/" data-tooltip="如何在devise中返回登陆前的页面">
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/09/22/20160922/" data-tooltip="Rack MiddleWare In and Out">
                 
                     <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
                     <i class="fa fa-angle-right"></i>
@@ -264,17 +286,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -322,7 +344,7 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/03/12/20160312/"  data-tooltip="Prevent Browser from caching the page">
+                    <a class="post-action-btn btn btn--disabled">
                 
                     <i class="fa fa-angle-left"></i>
                     <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
@@ -330,7 +352,7 @@
             </li>
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/03/05/20160305/" data-tooltip="如何在devise中返回登陆前的页面">
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2016/09/22/20160922/" data-tooltip="Rack MiddleWare In and Out">
                 
                     <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
                     <i class="fa fa-angle-right"></i>
@@ -345,17 +367,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -381,17 +403,17 @@
                 <div id="share-options-bar" class="share-options-bar" data-behavior="3">
     <ul class="share-options">
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-google-plus"></i><span class="">分享到 Google+</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-facebook-official"></i><span>分享到 Facebook</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/03/07/20160307/">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://blog.bocchi.tokyo/2016/10/02/20161002/">
                 <i class="fa fa-twitter"></i><span>分享到 Twitter</span>
             </a>
         </li>
@@ -449,9 +471,9 @@
     
         <script>
              var disqus_config = function () {
-                 this.page.url = 'http://blog.bocchi.tokyo/2016/03/07/20160307/';
+                 this.page.url = 'http://blog.bocchi.tokyo/2016/10/02/20161002/';
                  
-                    this.page.identifier = '2016/03/07/20160307/';
+                    this.page.identifier = '2016/10/02/20161002/';
                                   
              };
             (function() {
