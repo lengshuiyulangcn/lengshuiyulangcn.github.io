@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.bocchi.tokyo/"/>
-  <updated>2016-10-02T13:10:54.000Z</updated>
+  <updated>2016-10-11T14:37:02.000Z</updated>
   <id>http://blog.bocchi.tokyo/</id>
   
   <author>
@@ -14,6 +14,44 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Nginx 反向代理的一些备忘</title>
+    <link href="http://blog.bocchi.tokyo/2016/10/11/20161011/"/>
+    <id>http://blog.bocchi.tokyo/2016/10/11/20161011/</id>
+    <published>2016-10-11T14:34:37.000Z</published>
+    <updated>2016-10-11T14:37:02.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Rails+Nginx 反向代理的设定，很多时候复制粘贴过来就用了。其实很多东西还是值得深究一下的。&lt;/p&gt;
+&lt;p&gt;如下所示是常用的设定&lt;/p&gt;
+&lt;figure class=&quot;highlight nginx&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;attribute&quot;&gt;location&lt;/span&gt; / &amp;#123;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_pass&lt;/span&gt; http://localhost:3000;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_set_header&lt;/span&gt;    Host            &lt;span class=&quot;variable&quot;&gt;$host&lt;/span&gt;;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_set_header&lt;/span&gt;    X-Real-IP       &lt;span class=&quot;variable&quot;&gt;$remote_addr&lt;/span&gt;;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_set_header&lt;/span&gt;    X-Forwarded-for &lt;span class=&quot;variable&quot;&gt;$proxy_add_x_forwarded_for&lt;/span&gt;;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_set_header&lt;/span&gt;    X-Forwarded-Proto https;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;port_in_redirect&lt;/span&gt; &lt;span class=&quot;literal&quot;&gt;off&lt;/span&gt;;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_connect_timeout&lt;/span&gt; &lt;span class=&quot;number&quot;&gt;300&lt;/span&gt;;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;attribute&quot;&gt;proxy_redirect&lt;/span&gt; http:// https://;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &amp;#125;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h4 id=&quot;HOST-or-X-Forwarded-Host&quot;&gt;&lt;a href=&quot;#HOST-or-X-Forwarded-Host&quot; class=&quot;headerlink&quot; title=&quot;HOST or X-Forwarded-Host&quot;&gt;&lt;/a&gt;HOST or X-Forwarded-Host&lt;/h4&gt;&lt;p&gt;Nginx 默认在设置反向代理的时候把header设置成&lt;code&gt;proxy_pass&lt;/code&gt;里面的内容。 比如系上例中，如果不重新设置HOST，HOST的默认值会变成&lt;code&gt;http://localhost:3000&lt;/code&gt;。造成的结果就是后面的Rails找不到自己对应的服务器名。&lt;/p&gt;
+&lt;p&gt;我们有些时候还会看到类似&lt;code&gt;proxy_set_header    HTTP_X_FORWARDED_HOST $host;&lt;/code&gt;的设定。这是为什么呢？&lt;/p&gt;
+&lt;p&gt;参照Rack中 host_with_port 的代码，我们发现&lt;/p&gt;
+&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;host_with_port&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; forwarded = @env[&lt;span class=&quot;string&quot;&gt;&quot;HTTP_X_FORWARDED_HOST&quot;&lt;/span&gt;]&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    forwarded.split(&lt;span class=&quot;regexp&quot;&gt;/,\s?/&lt;/span&gt;).last&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    @env[&lt;span class=&quot;string&quot;&gt;&#39;HTTP_HOST&#39;&lt;/span&gt;] &lt;span class=&quot;params&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;&lt;span class=&quot;subst&quot;&gt;#&amp;#123;@env[&lt;span class=&quot;string&quot;&gt;&#39;SERVER_NAME&#39;&lt;/span&gt;] &lt;span class=&quot;params&quot;&gt;||&lt;/span&gt; @env[&lt;span class=&quot;string&quot;&gt;&#39;SERVER_ADDR&#39;&lt;/span&gt;]&amp;#125;&lt;/span&gt;:&lt;span class=&quot;subst&quot;&gt;#&amp;#123;@env[&lt;span class=&quot;string&quot;&gt;&#39;SERVER_PORT&#39;&lt;/span&gt;]&amp;#125;&lt;/span&gt;&quot;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;原来Rack会先看一下HTTP_X_FORWARDED_HOST头，如果HTTP_X_FORWARD没有设定，才会去查阅比如HOST之类的获取请求的地址。&lt;/p&gt;
+&lt;p&gt;那HTTP_X_FORWARD_HOST这么方便我们干嘛不直接用，反而要设置HOST 头呢？&lt;/p&gt;
+&lt;p&gt;原因是以上仅仅是Rack的实装，换成其他的框架，比如DJango，则需要在Config中把查看HTTP_X_FORWARD_HOST头的设定开启。保险起见还是HOST头一了百了。&lt;/p&gt;
+&lt;h4 id=&quot;X-Forwarded-for&quot;&gt;&lt;a href=&quot;#X-Forwarded-for&quot; class=&quot;headerlink&quot; title=&quot;X-Forwarded-for&quot;&gt;&lt;/a&gt;X-Forwarded-for&lt;/h4&gt;&lt;p&gt;以&lt;br&gt;&lt;code&gt;X-Forwarded-For: client1, proxy1, proxy2&lt;/code&gt;&lt;br&gt;的形式记录途经的proxy的地址。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$proxy_add_x_forwarded_for&lt;/code&gt; 顾名思义就是把自己的ip加上去。&lt;/p&gt;
+&lt;h4 id=&quot;X-Real-IP&quot;&gt;&lt;a href=&quot;#X-Real-IP&quot; class=&quot;headerlink&quot; title=&quot;X-Real-IP&quot;&gt;&lt;/a&gt;X-Real-IP&lt;/h4&gt;&lt;p&gt;不加上的话日志里面记录的就全是反向代理的IP咯。&lt;/p&gt;
+&lt;h4 id=&quot;X-Forwarded-Proto&quot;&gt;&lt;a href=&quot;#X-Forwarded-Proto&quot; class=&quot;headerlink&quot; title=&quot;X-Forwarded-Proto&quot;&gt;&lt;/a&gt;X-Forwarded-Proto&lt;/h4&gt;&lt;p&gt;日志一般只表示app 服务器和 反向代理之间使用的协议。而我们真正关心的应该是 client 和 反向代理之间的协议。X-Forwarded-Proto 用来标记client 和 反向代理之间使用的协议。&lt;/p&gt;
+&lt;h4 id=&quot;proxy-redirect&quot;&gt;&lt;a href=&quot;#proxy-redirect&quot; class=&quot;headerlink&quot; title=&quot;proxy_redirect&quot;&gt;&lt;/a&gt;proxy_redirect&lt;/h4&gt;&lt;p&gt;修改response中的Location。比如上例将response中Location凡是返回的http全改成https。&lt;/p&gt;
+&lt;p&gt;另外如果后端是Rails的话，看一下 &lt;a href=&quot;http://stackoverflow.com/questions/15676596/what-does-force-ssl-do-in-rails&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;force_ssl&lt;/a&gt;做了些什么还是挺有意义的。&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Rails+Nginx 反向代理的设定，很多时候复制粘贴过来就用了。其实很多东西还是值得深究一下的。&lt;/p&gt;
+&lt;p&gt;如下所示是常用的设定&lt;/p&gt;
+&lt;figure class=&quot;highlight nginx&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;p
+    
+    </summary>
+    
+    
+      <category term="Nginx" scheme="http://blog.bocchi.tokyo/tags/Nginx/"/>
+    
+  </entry>
   
   <entry>
     <title>没有干劲的周末以及 Electron</title>
@@ -482,11 +520,11 @@
     </summary>
     
     
-      <category term="生活" scheme="http://blog.bocchi.tokyo/tags/%E7%94%9F%E6%B4%BB/"/>
-    
       <category term="毕业季" scheme="http://blog.bocchi.tokyo/tags/%E6%AF%95%E4%B8%9A%E5%AD%A3/"/>
     
       <category term="回忆" scheme="http://blog.bocchi.tokyo/tags/%E5%9B%9E%E5%BF%86/"/>
+    
+      <category term="生活" scheme="http://blog.bocchi.tokyo/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
@@ -740,25 +778,6 @@
       <category term="工作" scheme="http://blog.bocchi.tokyo/tags/%E5%B7%A5%E4%BD%9C/"/>
     
       <category term="情感" scheme="http://blog.bocchi.tokyo/tags/%E6%83%85%E6%84%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>转移到新的博客</title>
-    <link href="http://blog.bocchi.tokyo/2016/02/17/%E8%BD%AC%E7%A7%BB/"/>
-    <id>http://blog.bocchi.tokyo/2016/02/17/转移/</id>
-    <published>2016-02-17T14:24:08.000Z</published>
-    <updated>2016-02-17T14:25:35.000Z</updated>
-    
-    <content type="html">&lt;figure class=&quot;highlight 1c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//todo&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;figure class=&quot;highlight 1c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;
-    
-    </summary>
-    
     
   </entry>
   
