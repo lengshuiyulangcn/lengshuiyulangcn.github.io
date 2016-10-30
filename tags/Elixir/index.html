@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Gyorouのぼっち日記">
-    <title>归档: 2016/10 - Gyorouのぼっち日記</title>
+    <title>标签: Elixir - Gyorouのぼっち日記</title>
     <meta name="author" content="Gyorou">
     
     
@@ -15,7 +15,7 @@
     
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Gyorouのぼっち日記">
-<meta property="og:url" content="http://blog.bocchi.tokyo/archives/2016/10/index.html">
+<meta property="og:url" content="http://blog.bocchi.tokyo/tags/Elixir/index.html">
 <meta property="og:site_name" content="Gyorouのぼっち日記">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gyorouのぼっち日記">
@@ -248,134 +248,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/10/11/20161011/">
-                            Nginx 反向代理的一些备忘
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue Oct 11 2016 23:34:37 GMT+0900">
-	
-		    10月 11, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>Rails+Nginx 反向代理的设定，很多时候复制粘贴过来就用了。其实很多东西还是值得深究一下的。</p>
-<p>如下所示是常用的设定</p>
-<figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">location</span> / &#123;</div><div class="line">    <span class="attribute">proxy_pass</span> http://localhost:3000;</div><div class="line">    <span class="attribute">proxy_set_header</span>    Host            <span class="variable">$host</span>;</div><div class="line">    <span class="attribute">proxy_set_header</span>    X-Real-IP       <span class="variable">$remote_addr</span>;</div><div class="line">    <span class="attribute">proxy_set_header</span>    X-Forwarded-for <span class="variable">$proxy_add_x_forwarded_for</span>;</div><div class="line">    <span class="attribute">proxy_set_header</span>    X-Forwarded-Proto https;</div><div class="line">    <span class="attribute">port_in_redirect</span> <span class="literal">off</span>;</div><div class="line">    <span class="attribute">proxy_connect_timeout</span> <span class="number">300</span>;</div><div class="line">    <span class="attribute">proxy_redirect</span> http:// https://;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<h4 id="HOST-or-X-Forwarded-Host"><a href="#HOST-or-X-Forwarded-Host" class="headerlink" title="HOST or X-Forwarded-Host"></a>HOST or X-Forwarded-Host</h4><p>Nginx 默认在设置反向代理的时候把header设置成<code>proxy_pass</code>里面的内容。 比如系上例中，如果不重新设置HOST，HOST的默认值会变成<code>http://localhost:3000</code>。造成的结果就是后面的Rails找不到自己对应的服务器名。</p>
-<p>我们有些时候还会看到类似<code>proxy_set_header    HTTP_X_FORWARDED_HOST $host;</code>的设定。这是为什么呢？</p>
-<p>参照Rack中 host_with_port 的代码，我们发现</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">host_with_port</span></span></div><div class="line">  <span class="keyword">if</span> forwarded = @env[<span class="string">"HTTP_X_FORWARDED_HOST"</span>]</div><div class="line">    forwarded.split(<span class="regexp">/,\s?/</span>).last</div><div class="line">  <span class="keyword">else</span></div><div class="line">    @env[<span class="string">'HTTP_HOST'</span>] <span class="params">||</span> <span class="string">"<span class="subst">#&#123;@env[<span class="string">'SERVER_NAME'</span>] <span class="params">||</span> @env[<span class="string">'SERVER_ADDR'</span>]&#125;</span>:<span class="subst">#&#123;@env[<span class="string">'SERVER_PORT'</span>]&#125;</span>"</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>原来Rack会先看一下HTTP_X_FORWARDED_HOST头，如果HTTP_X_FORWARD没有设定，才会去查阅比如HOST之类的获取请求的地址。</p>
-<p>那HTTP_X_FORWARD_HOST这么方便我们干嘛不直接用，反而要设置HOST 头呢？</p>
-<p>原因是以上仅仅是Rack的实装，换成其他的框架，比如DJango，则需要在Config中把查看HTTP_X_FORWARD_HOST头的设定开启。保险起见还是HOST头一了百了。</p>
-<h4 id="X-Forwarded-for"><a href="#X-Forwarded-for" class="headerlink" title="X-Forwarded-for"></a>X-Forwarded-for</h4><p>以<br><code>X-Forwarded-For: client1, proxy1, proxy2</code><br>的形式记录途经的proxy的地址。</p>
-<p><code>$proxy_add_x_forwarded_for</code> 顾名思义就是把自己的ip加上去。</p>
-<h4 id="X-Real-IP"><a href="#X-Real-IP" class="headerlink" title="X-Real-IP"></a>X-Real-IP</h4><p>不加上的话日志里面记录的就全是反向代理的IP咯。</p>
-<h4 id="X-Forwarded-Proto"><a href="#X-Forwarded-Proto" class="headerlink" title="X-Forwarded-Proto"></a>X-Forwarded-Proto</h4><p>日志一般只表示app 服务器和 反向代理之间使用的协议。而我们真正关心的应该是 client 和 反向代理之间的协议。X-Forwarded-Proto 用来标记client 和 反向代理之间使用的协议。</p>
-<h4 id="proxy-redirect"><a href="#proxy-redirect" class="headerlink" title="proxy_redirect"></a>proxy_redirect</h4><p>修改response中的Location。比如上例将response中Location凡是返回的http全改成https。</p>
-<p>另外如果后端是Rails的话，看一下 <a href="http://stackoverflow.com/questions/15676596/what-does-force-ssl-do-in-rails" target="_blank" rel="external">force_ssl</a>做了些什么还是挺有意义的。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/10/11/20161011/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/10/02/20161002/">
-                            没有干劲的周末以及 Electron
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 02 2016 22:09:40 GMT+0900">
-	
-		    10月 02, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>周末抽时间看了一下时下很火的Electron。<br>Electron是基于google V8 以及 chromium 的跨平台CS桌面应用框架。<br>通过 NodeJS衔接 OS 的I/O 操作， 通过 CSS/JS/HTML 来渲染UI。</p>
-<p>和大部分桌面应用的区别就是，Electron 通过 Node 进行 OS 的I/O 操作，而传统桌面应用使用OS提供的API。<br>Electron 通过 CSS/JS/HTML 来渲染UI， 而传统桌面应用使用OS提供的API。</p>
-<p>大名鼎鼎的编辑器Atom就是基于Electron的跨平台应用。<br>其他比较有名的应用，比如Slack也是基于Electron。</p>
-<h3 id="quick-start"><a href="#quick-start" class="headerlink" title="quick-start"></a>quick-start</h3><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Clone the repository</span></div><div class="line">$ git <span class="keyword">clone</span> <span class="title">https</span>://github.com/electron/electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Go into the repository</span></div><div class="line">$ cd electron-quick-<span class="literal">start</span></div><div class="line"><span class="comment"># Install dependencies and run the app</span></div><div class="line">$ npm install &amp;&amp; npm <span class="literal">start</span></div></pre></td></tr></table></figure>
-<p>Electron的核心可以是一个<code>main.js</code></p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">your-app/</div><div class="line">├── package<span class="selector-class">.json</span></div><div class="line">├── main<span class="selector-class">.js</span></div><div class="line">└── index.html</div></pre></td></tr></table></figure>
-<p><code>main.js</code> 作为主进程，需要在其中创建一个窗口，将需要载入的页面载入该窗口中，绑定一系列监听时间来对用户的操作作出反应。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> &#123;app, BrowserWindow&#125; = <span class="built_in">require</span>(<span class="string">'electron'</span>)</div><div class="line"></div><div class="line"><span class="keyword">let</span> win</div><div class="line">win = <span class="keyword">new</span> BrowserWindow(&#123;width: <span class="number">800</span>, height: <span class="number">600</span>&#125;)</div><div class="line"></div><div class="line"> <span class="comment">// and load the index.html of the app.</span></div><div class="line"> win.loadURL(<span class="string">`file://<span class="subst">$&#123;__dirname&#125;</span>/index.html`</span>)</div><div class="line"></div><div class="line"> win.on(<span class="string">'closed'</span>, () =&gt; &#123;</div><div class="line">    <span class="comment">// Dereference the window object, usually you would store windows</span></div><div class="line">    <span class="comment">// in an array if your app supports multi windows, this is the time</span></div><div class="line">    <span class="comment">// when you should delete the corresponding element.</span></div><div class="line">    win = <span class="literal">null</span></div><div class="line">  &#125;)</div></pre></td></tr></table></figure>
-<p>由于内容一目了然，具体我就不抄了。</p>
-<h3 id="能干什么"><a href="#能干什么" class="headerlink" title="能干什么"></a>能干什么</h3><p>基本的本地应用程序基本都能用Electron实现。现在间的比较多的有Markdown编辑器，文法高亮编辑器等等。<br>Markdown编辑器的思路很简单就是和网页上用Marked.js实现的完全一样，再附加保存到本地功能和从本地文件系统读取而已。<br>文法高亮编辑器配合JS的编辑器ACE，也就是多个本地读写的功能而已，这些都不用多说。</p>
-<p>与http restful API交互可以使用<code>superagent</code>之类的http客户端，实现复杂的UI也可以套用React和Redux以及其他一大波前端框架。</p>
-<p>总之不管如何，Electron的本质其实就是获得了本地IO操作能力的Web APP。</p>
-<h3 id="没有干劲的周末"><a href="#没有干劲的周末" class="headerlink" title="没有干劲的周末"></a>没有干劲的周末</h3><p>大抵工作上不爽是最大的原因。</p>
-<ul>
-<li><p>十分讨厌PHP以及写得很屎的PHP。</p>
-</li>
-<li><p>觉得周围很多人很蠢或者在混日子。</p>
-</li>
-<li><p>工作的环境不适合自己的技术成长。</p>
-</li>
-<li><p>觉得用户是傻逼。</p>
-</li>
-<li><p>觉得工资太低。</p>
-</li>
-<li><p>觉得把妹太难。</p>
-</li>
-<li><p>我也是傻逼。</p>
-</li>
-</ul>
-<p>还是趁机汲取为数不多的能学到的东西，找好下家吧。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/10/02/20161002/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -385,7 +257,6 @@
 </div>
 
 </section>
-
 
 
                 <footer id="footer" class="main-content-wrap">

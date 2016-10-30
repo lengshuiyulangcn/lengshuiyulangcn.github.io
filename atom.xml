@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.bocchi.tokyo/"/>
-  <updated>2016-10-11T14:37:02.000Z</updated>
+  <updated>2016-10-30T15:01:04.000Z</updated>
   <id>http://blog.bocchi.tokyo/</id>
   
   <author>
@@ -14,6 +14,49 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>俗而不凡的Plug</title>
+    <link href="http://blog.bocchi.tokyo/2016/10/30/20161030/"/>
+    <id>http://blog.bocchi.tokyo/2016/10/30/20161030/</id>
+    <published>2016-10-30T14:58:05.000Z</published>
+    <updated>2016-10-30T15:01:04.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Plug这个名字作为Elixir Web框架Phoenix 中间件的名称，俗得可以。&lt;br&gt;但是Plug的思想十分单纯，基本就是为了实现和Rack相同的中间件功能。&lt;br&gt;然后和Rails大不相同的是，Rails中router以后的部分我们基本无法定制中间件。而Plug可以轻轻松松插到controller中间。controller的action本质上也是Plug，所以在Phoenix 框架中，从受理request到回复response，这一系列中间过程其实就是串联起来的Plug来完成的。&lt;/p&gt;
+&lt;h3 id=&quot;Module-Plug-和-function-Plug&quot;&gt;&lt;a href=&quot;#Module-Plug-和-function-Plug&quot; class=&quot;headerlink&quot; title=&quot;Module Plug 和 function Plug&quot;&gt;&lt;/a&gt;Module Plug 和 function Plug&lt;/h3&gt;&lt;p&gt;要写一个Plug很简单。首先以function plug为例子。&lt;/p&gt;
+&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;hello_world_plug&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(conn, &lt;span class=&quot;number&quot;&gt;_&lt;/span&gt;)&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  conn&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;params&quot;&gt;|&amp;gt; put_resp_content_type(&quot;text/plain&quot;)&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  |&amp;gt; send_resp(&lt;span class=&quot;number&quot;&gt;200&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;&quot;Hello world&quot;&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;任何第一个参数为Plug.connect struct，并返回Plug.connect struct的带两个参数的函数都可以function plug。&lt;br&gt;比如上例，我们向Plug.connect写入了一些http的header，最后返回一个带200 status，body为”Hello world”的 Plug.connect struct。&lt;br&gt;其实作为function的Plug，我们并不关心函数的第二个参数是什么。&lt;/p&gt;
+&lt;p&gt;那么第二个参数是用来干什么的呢？ 那自然是Module的Plug中会用到。&lt;br&gt;所谓Module的Plug，需要实现两个函数。第一个是&lt;code&gt;init/1&lt;/code&gt;函数，而第二个是&lt;code&gt;call/2&lt;/code&gt;函数。&lt;br&gt;来看一眼&lt;code&gt;Plug.Session&lt;/code&gt;的定义。&lt;/p&gt;
+&lt;figure class=&quot;highlight sql&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;13&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;14&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;15&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;16&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;17&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;18&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;19&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;20&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;21&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;22&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;23&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;24&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;defmodule Plug.Session &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; init(opts) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;store&lt;/span&gt;        = Keyword.fetch!(opts, :&lt;span class=&quot;keyword&quot;&gt;store&lt;/span&gt;) |&amp;gt; convert_store&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;key&lt;/span&gt;          = Keyword.fetch!(opts, :&lt;span class=&quot;keyword&quot;&gt;key&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  cookie_opts  = Keyword.take(opts, @cookie_opts)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  store_opts   = Keyword.drop(opts, [:&lt;span class=&quot;keyword&quot;&gt;store&lt;/span&gt;, :&lt;span class=&quot;keyword&quot;&gt;key&lt;/span&gt;] ++ @cookie_opts)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  store_config = store.init(store_opts)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  %&amp;#123;&lt;span class=&quot;keyword&quot;&gt;store&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;store&lt;/span&gt;,&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    store_config: store_config,&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;key&lt;/span&gt;: &lt;span class=&quot;keyword&quot;&gt;key&lt;/span&gt;,&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    cookie_opts: cookie_opts&amp;#125;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;call&lt;/span&gt;(&lt;span class=&quot;keyword&quot;&gt;conn&lt;/span&gt;, config) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  Conn.put_private(&lt;span class=&quot;keyword&quot;&gt;conn&lt;/span&gt;, :plug_session_fetch, fetch_session(config))&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;再来看看&lt;code&gt;Phoenix&lt;/code&gt;框架中使用Plug.Session的例子。&lt;/p&gt;
+&lt;figure class=&quot;highlight dts&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;# lib/hello_phoenix/endpoint.ex&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;plug Plug.Session,&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;symbol&quot;&gt;    store:&lt;/span&gt; :cookie,&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;symbol&quot;&gt;    key:&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;_hello_phoenix_key&quot;&lt;/span&gt;,&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;symbol&quot;&gt;    signing_salt:&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;d8S1kdLV&quot;&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;可以看到&lt;code&gt;init/1&lt;/code&gt;函数的参数来自&lt;code&gt;plug plug_name, opts&lt;/code&gt; 的&lt;code&gt;opts&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&quot;Session-in-Cookie-的实装-Plug-Session-COOKIE&quot;&gt;&lt;a href=&quot;#Session-in-Cookie-的实装-Plug-Session-COOKIE&quot; class=&quot;headerlink&quot; title=&quot;Session in Cookie 的实装 Plug.Session.COOKIE&quot;&gt;&lt;/a&gt;Session in Cookie 的实装 Plug.Session.COOKIE&lt;/h3&gt;&lt;p&gt;Plug.Session 是如何开放接口提供调用Plug.Session.COOKIE中的方法呢。&lt;br&gt;首先Plug.Session 和Plug.Session.COOKIE虽然看起来前缀相同，但是Elixir中，module的是扁平的，也就是说，&lt;br&gt;这两个module没有一毛钱关系。&lt;/p&gt;
+&lt;p&gt;注意看 Plug.Session 的 &lt;code&gt;init/1&lt;/code&gt;函数，&lt;code&gt;store        = Keyword.fetch!(opts, :store) |&amp;gt; convert_store&lt;/code&gt;&lt;br&gt;按照 &lt;code&gt;lib/hello_phoenix/endpoint.ex&lt;/code&gt; 中的配置，&lt;code&gt;Keyword.fetch!(opts, :store)&lt;/code&gt;的结果应该是&lt;code&gt;:cookie&lt;/code&gt;。&lt;br&gt;那么store的结果就应该是&lt;code&gt;:cookie|&amp;gt; convert_store&lt;/code&gt;的结果了。&lt;/p&gt;
+&lt;p&gt;终于是激动人心的&lt;code&gt;convert_store/1&lt;/code&gt;了。&lt;/p&gt;
+&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;defp&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;convert_store&lt;/span&gt;&lt;/span&gt;(store) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;case&lt;/span&gt; Atom.to_string(store) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;string&quot;&gt;&quot;Elixir.&quot;&lt;/span&gt; &amp;lt;&amp;gt; &lt;span class=&quot;number&quot;&gt;_&lt;/span&gt; -&amp;gt; store&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    reference      -&amp;gt; Module.concat(Plug.Session, String.upcase(reference))&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;卧槽 &lt;code&gt;&amp;quot;Elixir.&amp;quot; &amp;lt;&amp;gt; _ -&amp;gt; store&lt;/code&gt;到底是什么？&lt;br&gt;再来复习一下Elixir的pattern match吧。&lt;/p&gt;
+&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;case&lt;/span&gt; &amp;#123;&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;4&lt;/span&gt;&amp;#125; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &amp;#123;&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,x,&lt;span class=&quot;number&quot;&gt;4&lt;/span&gt;&amp;#125; -&amp;gt; x&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &amp;#123;&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;4&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;&amp;#125; -&amp;gt; y&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;在这个例子中，Elixir 会把 {1,3,4} 和 {1,x,4}进行 match。 这个时候，x匹配上了4。&lt;br&gt;再来看&lt;code&gt;&amp;quot;Elixir.&amp;quot; &amp;lt;&amp;gt; _ -&amp;gt; store&lt;/code&gt;， 其实就是，如果 store以 &lt;code&gt;Elixir.&lt;/code&gt;开头，那么我们返回store。&lt;br&gt;当store为&lt;code&gt;:cookie&lt;/code&gt;时候，条件落到第二个，&lt;code&gt;reference&lt;/code&gt; 和 &lt;code&gt;:cookie&lt;/code&gt;匹配， &lt;code&gt;case ...do&lt;/code&gt;的返回结果则是将 &lt;code&gt;Plug.Session&lt;/code&gt; 结合到 &lt;code&gt;&amp;quot;cookie&amp;quot;&lt;/code&gt;前面，最后结果为&lt;code&gt;&amp;quot;:Plug.Session.COOKIE&amp;quot;&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;哦，原来如此，这样使用&lt;code&gt;store.put/3&lt;/code&gt;其实就是在调用&lt;code&gt;Plug.Session.COOKIE.put/3&lt;/code&gt;了。&lt;br&gt;这样的话，我们就可以自由扩展&lt;code&gt;Plug.Session&lt;/code&gt;来写我们自己的Session存贮了。&lt;br&gt;其实，Plug为Session的扩展提供了Protocol。&lt;/p&gt;
+&lt;figure class=&quot;highlight less&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;selector-tag&quot;&gt;defmodule&lt;/span&gt; &lt;span class=&quot;selector-tag&quot;&gt;Plug&lt;/span&gt;&lt;span class=&quot;selector-class&quot;&gt;.Session&lt;/span&gt;&lt;span class=&quot;selector-class&quot;&gt;.Store&lt;/span&gt; &lt;span class=&quot;selector-tag&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  @&lt;span class=&quot;selector-tag&quot;&gt;callback&lt;/span&gt; &lt;span class=&quot;selector-tag&quot;&gt;init&lt;/span&gt;(Plug.opts) :: &lt;span class=&quot;selector-tag&quot;&gt;Plug&lt;/span&gt;&lt;span class=&quot;selector-class&quot;&gt;.opts&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  @&lt;span class=&quot;selector-tag&quot;&gt;callback&lt;/span&gt; &lt;span class=&quot;selector-tag&quot;&gt;get&lt;/span&gt;(Plug.Conn.t, cookie, Plug.opts) :: &amp;#123;sid, session&amp;#125;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;variable&quot;&gt;@callback&lt;/span&gt; put(Plug.Conn.t, sid, any, Plug.opts) :: cookie&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;variable&quot;&gt;@callback&lt;/span&gt; delete(Plug.Conn.t, sid, Plug.opts) :: :ok&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;end&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h3 id=&quot;Thoughts&quot;&gt;&lt;a href=&quot;#Thoughts&quot; class=&quot;headerlink&quot; title=&quot;Thoughts&quot;&gt;&lt;/a&gt;Thoughts&lt;/h3&gt;&lt;p&gt;相比Rack，Plug借助一个神一般的struct &lt;code&gt;Plug.Conn&lt;/code&gt; 实现了比Rack更方便的插拔性能。&lt;br&gt;据说Plug的函数实现每次需要带一个不用的参数其实也是神烦。不过不实际写一下还是没什么实感。&lt;br&gt;另外，个人感觉学习Phoenix框架的关键，除了理解Elixir自身，就是熟悉&lt;code&gt;Plug.Conn&lt;/code&gt; 和 &lt;code&gt;Ecto.Changeset&lt;/code&gt; 这两个东西了。&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Plug这个名字作为Elixir Web框架Phoenix 中间件的名称，俗得可以。&lt;br&gt;但是Plug的思想十分单纯，基本就是为了实现和Rack相同的中间件功能。&lt;br&gt;然后和Rails大不相同的是，Rails中router以后的部分我们基本无法定制中间件。而Plug可以
+    
+    </summary>
+    
+    
+      <category term="Elixir" scheme="http://blog.bocchi.tokyo/tags/Elixir/"/>
+    
+      <category term="Phoenix" scheme="http://blog.bocchi.tokyo/tags/Phoenix/"/>
+    
+      <category term="Plug" scheme="http://blog.bocchi.tokyo/tags/Plug/"/>
+    
+  </entry>
   
   <entry>
     <title>Nginx 反向代理的一些备忘</title>
@@ -267,8 +310,8 @@
   
   <entry>
     <title>我们也许并不合适</title>
-    <link href="http://blog.bocchi.tokyo/2016/06/15/20160615/"/>
-    <id>http://blog.bocchi.tokyo/2016/06/15/20160615/</id>
+    <link href="http://blog.bocchi.tokyo/2016/06/16/20160615/"/>
+    <id>http://blog.bocchi.tokyo/2016/06/16/20160615/</id>
     <published>2016-06-15T15:40:06.000Z</published>
     <updated>2016-06-15T15:46:32.000Z</updated>
     
@@ -496,8 +539,8 @@
   
   <entry>
     <title>东京一年</title>
-    <link href="http://blog.bocchi.tokyo/2016/03/27/20160327/"/>
-    <id>http://blog.bocchi.tokyo/2016/03/27/20160327/</id>
+    <link href="http://blog.bocchi.tokyo/2016/03/28/20160327/"/>
+    <id>http://blog.bocchi.tokyo/2016/03/28/20160327/</id>
     <published>2016-03-27T15:49:34.000Z</published>
     <updated>2016-03-27T15:50:23.000Z</updated>
     
@@ -747,37 +790,6 @@
     
     
       <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>又是一年花粉弥漫</title>
-    <link href="http://blog.bocchi.tokyo/2016/02/21/%E5%8F%88%E6%98%AF%E4%B8%80%E5%B9%B4%E8%8A%B1%E7%B2%89%E5%BC%A5%E6%BC%AB/"/>
-    <id>http://blog.bocchi.tokyo/2016/02/21/又是一年花粉弥漫/</id>
-    <published>2016-02-21T08:34:51.000Z</published>
-    <updated>2016-02-21T08:36:04.000Z</updated>
-    
-    <content type="html">&lt;p&gt;旧历的春节过后，上周突然刮起了大风。接着突然连着两天气温瞬间上了摄氏20度。&lt;br&gt;难得春光明媚，稍微去二子玉川的多摩河边溜达了一圈，第二天毫无征兆地开始涕流不止，眼睛发痒。&lt;br&gt;这才恍然醒悟，已经是花粉弥漫的季节了。&lt;/p&gt;
-&lt;p&gt;都说人刚到外地的话很容易就突然水土不服。&lt;br&gt;然而花粉过敏却是在不知不觉中悄然生根，在你以为似乎习惯了这里的一年四季，喜欢上这里惬意而自在的生活的时候，突然就投下阴影。&lt;br&gt;与其说是水土不服，花粉过敏倒更像是思乡的愁绪。在往后的漫长的人生之中随然大部分时间都会淡忘，但是到了每个特定的时节，却能让人感到折磨和煎熬。&lt;/p&gt;
-&lt;p&gt;不知不觉背景离乡在这里已经生活了三年有余。经历了学生时代到现在踏上社会，在一家还算不错的企业做着web的开发，不断地学习着新的知识，不断地认识新的朋友。一切也许用太过顺利来形容也不为过。而然这约莫四年里，回家的次数却是仅仅的两次，逢年过节，更是一次都没有回去。&lt;/p&gt;
-&lt;p&gt;第一年没有回家过年是因为还沉浸在刚到这里的新鲜感。第二年的新年在备战着学会的论文中度过，第三年的借口是忙碌着准备毕业和搬家，而今年本该没有了借口，甚至一度买好了机票，年前爷爷的突然去世使得我不得不改变行程，临时回国了几天之后，退掉了之后的机票。&lt;/p&gt;
-&lt;p&gt;奶奶说，爷爷的病本该早些就能发现的，可是他却倔强地不愿意去自己儿子生前工作过的医院诊疗，硬是拖了好久这才诊断出来恶性肿瘤。&lt;br&gt;元旦的晚上想给家里打个电话，却没有人接。后来得知奶奶去医院看青光眼了。除夕的晚上给家里打电话也是没有人接，后来才得知奶奶自己一个人在家冷清，去了姨婆婆的家里。最终今年的新年也在手机群消息频繁地震动声中过去了。&lt;/p&gt;
-&lt;p&gt;昨天晚上睡梦中莫名其妙地哭地很厉害，我一个二十五六的青年就像小女子一样哭醒了。已经记不清梦的详细，该是白天朋友圈看到些家庭温馨的照片而戳中了痛点吧。&lt;br&gt;有些时候，和朋友聊天吃饭，不知不觉会聊到家庭以及以前的生活。我似乎也习惯当有人说道:“那你父母一定…”的时候编个随便一点的谎言搪塞过去。能够人模人样地生活着的人，大抵都是接受着良好的家庭环境的影响吧。&lt;br&gt;爷爷在世的时候，打电话回家，除了尽说些自己一切都好，一帆风顺的话，有时候，老人家也会语重心长地和我说:“你年纪也不小了，该是看一下有没有合适的人了，我们不奢求什么，只要大概家庭完整合睦教育良好就行了。”这句本该出自父母口中，略带命令口吻的话，在爷爷的语气中，却更像是一种期待。可是老人家应该也是糊涂了，咱们家这么支离破碎，怎么去期待人家完整和睦呀。&lt;/p&gt;
-&lt;p&gt;最近在看富士电视台的&lt;code&gt;いつかこの恋を思い出してきっと泣いてしまう&lt;/code&gt;(追忆潸然)这部日剧，除了被男主女主无数次错过与邂逅以及生活的种种无奈所感，&lt;br&gt;也是庆幸从小在畸形的家庭环境中成长大的男主和女主，还保持着纯洁温柔善良的心。更是庆幸类似环境中成长的自己受到了更加系统和完整的教育，有着一份体面而有价值的工作。&lt;/p&gt;
-&lt;p&gt;不知不觉已经工作了一年。二十五还不知二十六的我，依旧在背井离乡的土地上生活着。我并没有安土重迁的观念，甚至只有一种将来并不可能更糟糕的乐观。&lt;br&gt;四五年以后，三十的我，是否还是怀着同样的热情，是否已经找到喜欢的人，是否已经实现了现在的理想，提供和维护着能使人幸福的网络服务？&lt;br&gt;可是不论如何，像是无法逃避春天花粉过敏带来的踢死横流的酸爽一般，这种不时袭来的乡愁依然是会带来针扎一般的疼痛。&lt;br&gt;这种疼痛迫使人更想获得幸福，迫使人想要让更多的人幸福。&lt;/p&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;旧历的春节过后，上周突然刮起了大风。接着突然连着两天气温瞬间上了摄氏20度。&lt;br&gt;难得春光明媚，稍微去二子玉川的多摩河边溜达了一圈，第二天毫无征兆地开始涕流不止，眼睛发痒。&lt;br&gt;这才恍然醒悟，已经是花粉弥漫的季节了。&lt;/p&gt;
-&lt;p&gt;都说人刚到外地的话很容易就突然水土不服
-    
-    </summary>
-    
-    
-      <category term="工作" scheme="http://blog.bocchi.tokyo/tags/%E5%B7%A5%E4%BD%9C/"/>
-    
-      <category term="情感" scheme="http://blog.bocchi.tokyo/tags/%E6%83%85%E6%84%9F/"/>
     
   </entry>
   

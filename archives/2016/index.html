@@ -194,13 +194,73 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/10/30/20161030/">
+                            俗而不凡的Plug
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Sun Oct 30 2016 23:58:05 GMT+0900">
+	
+		    10月 30, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <p>Plug这个名字作为Elixir Web框架Phoenix 中间件的名称，俗得可以。<br>但是Plug的思想十分单纯，基本就是为了实现和Rack相同的中间件功能。<br>然后和Rails大不相同的是，Rails中router以后的部分我们基本无法定制中间件。而Plug可以轻轻松松插到controller中间。controller的action本质上也是Plug，所以在Phoenix 框架中，从受理request到回复response，这一系列中间过程其实就是串联起来的Plug来完成的。</p>
+<h3 id="Module-Plug-和-function-Plug"><a href="#Module-Plug-和-function-Plug" class="headerlink" title="Module Plug 和 function Plug"></a>Module Plug 和 function Plug</h3><p>要写一个Plug很简单。首先以function plug为例子。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello_world_plug</span><span class="params">(conn, <span class="number">_</span>)</span></span> <span class="keyword">do</span></div><div class="line">  conn</div><div class="line">  <span class="params">|&gt; put_resp_content_type("text/plain")</span></div><div class="line">  |&gt; send_resp(<span class="number">200</span>, <span class="string">"Hello world"</span>)</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>任何第一个参数为Plug.connect struct，并返回Plug.connect struct的带两个参数的函数都可以function plug。<br>比如上例，我们向Plug.connect写入了一些http的header，最后返回一个带200 status，body为”Hello world”的 Plug.connect struct。<br>其实作为function的Plug，我们并不关心函数的第二个参数是什么。</p>
+<p>那么第二个参数是用来干什么的呢？ 那自然是Module的Plug中会用到。<br>所谓Module的Plug，需要实现两个函数。第一个是<code>init/1</code>函数，而第二个是<code>call/2</code>函数。<br>来看一眼<code>Plug.Session</code>的定义。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">defmodule Plug.Session <span class="keyword">do</span></div><div class="line"></div><div class="line">...</div><div class="line">...</div><div class="line"></div><div class="line"><span class="keyword">def</span> init(opts) <span class="keyword">do</span></div><div class="line">  <span class="keyword">store</span>        = Keyword.fetch!(opts, :<span class="keyword">store</span>) |&gt; convert_store</div><div class="line">  <span class="keyword">key</span>          = Keyword.fetch!(opts, :<span class="keyword">key</span>)</div><div class="line">  cookie_opts  = Keyword.take(opts, @cookie_opts)</div><div class="line">  store_opts   = Keyword.drop(opts, [:<span class="keyword">store</span>, :<span class="keyword">key</span>] ++ @cookie_opts)</div><div class="line">  store_config = store.init(store_opts)</div><div class="line"></div><div class="line">  %&#123;<span class="keyword">store</span>: <span class="keyword">store</span>,</div><div class="line">    store_config: store_config,</div><div class="line">    <span class="keyword">key</span>: <span class="keyword">key</span>,</div><div class="line">    cookie_opts: cookie_opts&#125;</div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line"><span class="keyword">def</span> <span class="keyword">call</span>(<span class="keyword">conn</span>, config) <span class="keyword">do</span></div><div class="line">  Conn.put_private(<span class="keyword">conn</span>, :plug_session_fetch, fetch_session(config))</div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line">...</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>再来看看<code>Phoenix</code>框架中使用Plug.Session的例子。</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta"># lib/hello_phoenix/endpoint.ex</span></div><div class="line">plug Plug.Session,</div><div class="line"><span class="symbol">    store:</span> :cookie,</div><div class="line"><span class="symbol">    key:</span> <span class="string">"_hello_phoenix_key"</span>,</div><div class="line"><span class="symbol">    signing_salt:</span> <span class="string">"d8S1kdLV"</span></div></pre></td></tr></table></figure>
+<p>可以看到<code>init/1</code>函数的参数来自<code>plug plug_name, opts</code> 的<code>opts</code>。</p>
+<h3 id="Session-in-Cookie-的实装-Plug-Session-COOKIE"><a href="#Session-in-Cookie-的实装-Plug-Session-COOKIE" class="headerlink" title="Session in Cookie 的实装 Plug.Session.COOKIE"></a>Session in Cookie 的实装 Plug.Session.COOKIE</h3><p>Plug.Session 是如何开放接口提供调用Plug.Session.COOKIE中的方法呢。<br>首先Plug.Session 和Plug.Session.COOKIE虽然看起来前缀相同，但是Elixir中，module的是扁平的，也就是说，<br>这两个module没有一毛钱关系。</p>
+<p>注意看 Plug.Session 的 <code>init/1</code>函数，<code>store        = Keyword.fetch!(opts, :store) |&gt; convert_store</code><br>按照 <code>lib/hello_phoenix/endpoint.ex</code> 中的配置，<code>Keyword.fetch!(opts, :store)</code>的结果应该是<code>:cookie</code>。<br>那么store的结果就应该是<code>:cookie|&gt; convert_store</code>的结果了。</p>
+<p>终于是激动人心的<code>convert_store/1</code>了。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">defp</span> <span class="title">convert_store</span></span>(store) <span class="keyword">do</span></div><div class="line">  <span class="keyword">case</span> Atom.to_string(store) <span class="keyword">do</span></div><div class="line">    <span class="string">"Elixir."</span> &lt;&gt; <span class="number">_</span> -&gt; store</div><div class="line">    reference      -&gt; Module.concat(Plug.Session, String.upcase(reference))</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>卧槽 <code>&quot;Elixir.&quot; &lt;&gt; _ -&gt; store</code>到底是什么？<br>再来复习一下Elixir的pattern match吧。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> &#123;<span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>&#125; <span class="keyword">do</span></div><div class="line">  &#123;<span class="number">1</span>,x,<span class="number">4</span>&#125; -&gt; x</div><div class="line">  &#123;<span class="number">1</span>,<span class="number">4</span>,<span class="number">3</span>&#125; -&gt; y</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>在这个例子中，Elixir 会把 {1,3,4} 和 {1,x,4}进行 match。 这个时候，x匹配上了4。<br>再来看<code>&quot;Elixir.&quot; &lt;&gt; _ -&gt; store</code>， 其实就是，如果 store以 <code>Elixir.</code>开头，那么我们返回store。<br>当store为<code>:cookie</code>时候，条件落到第二个，<code>reference</code> 和 <code>:cookie</code>匹配， <code>case ...do</code>的返回结果则是将 <code>Plug.Session</code> 结合到 <code>&quot;cookie&quot;</code>前面，最后结果为<code>&quot;:Plug.Session.COOKIE&quot;</code>。</p>
+<p>哦，原来如此，这样使用<code>store.put/3</code>其实就是在调用<code>Plug.Session.COOKIE.put/3</code>了。<br>这样的话，我们就可以自由扩展<code>Plug.Session</code>来写我们自己的Session存贮了。<br>其实，Plug为Session的扩展提供了Protocol。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">defmodule</span> <span class="selector-tag">Plug</span><span class="selector-class">.Session</span><span class="selector-class">.Store</span> <span class="selector-tag">do</span></div><div class="line"></div><div class="line">  @<span class="selector-tag">callback</span> <span class="selector-tag">init</span>(Plug.opts) :: <span class="selector-tag">Plug</span><span class="selector-class">.opts</span></div><div class="line"></div><div class="line">  @<span class="selector-tag">callback</span> <span class="selector-tag">get</span>(Plug.Conn.t, cookie, Plug.opts) :: &#123;sid, session&#125;</div><div class="line"></div><div class="line">  <span class="variable">@callback</span> put(Plug.Conn.t, sid, any, Plug.opts) :: cookie</div><div class="line"></div><div class="line">  <span class="variable">@callback</span> delete(Plug.Conn.t, sid, Plug.opts) :: :ok</div><div class="line">end</div></pre></td></tr></table></figure>
+<h3 id="Thoughts"><a href="#Thoughts" class="headerlink" title="Thoughts"></a>Thoughts</h3><p>相比Rack，Plug借助一个神一般的struct <code>Plug.Conn</code> 实现了比Rack更方便的插拔性能。<br>据说Plug的函数实现每次需要带一个不用的参数其实也是神烦。不过不实际写一下还是没什么实感。<br>另外，个人感觉学习Phoenix框架的关键，除了理解Elixir自身，就是熟悉<code>Plug.Conn</code> 和 <code>Ecto.Changeset</code> 这两个东西了。</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/10/30/20161030/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/10/11/20161011/">
                             Nginx 反向代理的一些备忘
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue Oct 11 2016 14:34:37 GMT+0000">
+    <time itemprop="datePublished" content="Tue Oct 11 2016 23:34:37 GMT+0900">
 	
 		    10月 11, 2016
     	
@@ -257,7 +317,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 02 2016 13:09:40 GMT+0000">
+    <time itemprop="datePublished" content="Sun Oct 02 2016 22:09:40 GMT+0900">
 	
 		    10月 02, 2016
     	
@@ -328,7 +388,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Sep 22 2016 03:59:57 GMT+0000">
+    <time itemprop="datePublished" content="Thu Sep 22 2016 12:59:57 GMT+0900">
 	
 		    9月 22, 2016
     	
@@ -380,7 +440,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 10 2016 10:42:35 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jul 10 2016 19:42:35 GMT+0900">
 	
 		    7月 10, 2016
     	
@@ -443,7 +503,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 03 2016 13:06:28 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jul 03 2016 22:06:28 GMT+0900">
 	
 		    7月 03, 2016
     	
@@ -496,7 +556,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 26 2016 09:32:22 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jun 26 2016 18:32:22 GMT+0900">
 	
 		    6月 26, 2016
     	
@@ -550,15 +610,15 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
-                        <a class="link-unstyled" href="/2016/06/15/20160615/">
+                        <a class="link-unstyled" href="/2016/06/16/20160615/">
                             我们也许并不合适
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Jun 15 2016 15:40:06 GMT+0000">
+    <time itemprop="datePublished" content="Thu Jun 16 2016 00:40:06 GMT+0900">
 	
-		    6月 15, 2016
+		    6月 16, 2016
     	
     </time>
     
@@ -584,7 +644,7 @@
                     
                     
                         <p>
-                            <a href="/2016/06/15/20160615/#post-footer" class="postShorten-excerpt_link link">
+                            <a href="/2016/06/16/20160615/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
@@ -607,7 +667,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 05 2016 12:28:51 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jun 05 2016 21:28:51 GMT+0900">
 	
 		    6月 05, 2016
     	
@@ -670,7 +730,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue May 31 2016 13:37:52 GMT+0000">
+    <time itemprop="datePublished" content="Tue May 31 2016 22:37:52 GMT+0900">
 	
 		    5月 31, 2016
     	
@@ -722,51 +782,6 @@
                     
                         <p>
                             <a href="/2016/05/31/20160531-md/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/05/14/20160514-md/">
-                            如果猫从世界上消失
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat May 14 2016 10:38:31 GMT+0000">
-	
-		    5月 14, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>左手的知觉已经大部分恢复了。郁郁寡欢的心情也像最近的天气一样逐渐转晴。<br>今天去看了电影版的「世界から猫が消えたなら」(如果猫从世界上消失)的首映。</p>
-<p>就在一切都很平淡的一天，恶魔来到了被突然告知身患脑瘤，生命仅剩一天的男主身边。<br>作为生命延长一天的代价，世界上会有一样东西消失。<br>第一天恶魔从世界上带走了电话。男主和前女友因电话相识的回忆在此消失。<br>第二天恶魔从世界上带走了电影。男主和亲友因为电影而相识，每天交流电影的日常也像从未存在一般。<br>第三天恶魔决定带走陪伴在男主身边的猫。猫和逝去的母亲的回忆涌上心头。<br>最终,对人与人之间感情的珍重战胜了死亡的恐惧，男主得以释然微笑面对死亡。</p>
-<p>电话，电影，猫，这三样东西无非就是喻指爱情，友情和亲情这三样东西。人和人之间的关系，因为这些东西交织在一起，在生活中无形地留下痕迹。<br>原著作者借着这么一个文艺的标题，无非就是想要传达，如果这个世界上有比死亡更恐惧的东西，那必定是失去爱情，友情和亲情了吧。</p>
-<p>今年的春天很短，有相当一段时间在病院里躺过去了。马上该是黄梅时节了。<br>每到这个时节伴随的心情低落也是在所难免。甚至有好几次梦中醒来,泪流满面。<br>那年那时的在雨中无助奔跑的我，而今该有了自信去守护自己重要的东西了吧。<br>尽管如此，岁月的无情和残酷总是让人唏嘘不已。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/05/14/20160514-md/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
