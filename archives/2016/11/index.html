@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Gyorouのぼっち日記">
-    <title>标签: Elixir - Gyorouのぼっち日記</title>
+    <title>归档: 2016/11 - Gyorouのぼっち日記</title>
     <meta name="author" content="Gyorou">
     
     
@@ -15,7 +15,7 @@
     
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Gyorouのぼっち日記">
-<meta property="og:url" content="http://blog.bocchi.tokyo/tags/Elixir/index.html">
+<meta property="og:url" content="http://blog.bocchi.tokyo/archives/2016/11/index.html">
 <meta property="og:site_name" content="Gyorouのぼっち日記">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gyorouのぼっち日記">
@@ -253,66 +253,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/10/30/20161030/">
-                            俗而不凡的Plug
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 30 2016 14:58:05 GMT+0000">
-	
-		    10月 30, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>Plug这个名字作为Elixir Web框架Phoenix 中间件的名称，俗得可以。<br>但是Plug的思想十分单纯，基本就是为了实现和Rack相同的中间件功能。<br>然后和Rails大不相同的是，Rails中router以后的部分我们基本无法定制中间件。而Plug可以轻轻松松插到controller中间。controller的action本质上也是Plug，所以在Phoenix 框架中，从受理request到回复response，这一系列中间过程其实就是串联起来的Plug来完成的。</p>
-<h3 id="Module-Plug-和-function-Plug"><a href="#Module-Plug-和-function-Plug" class="headerlink" title="Module Plug 和 function Plug"></a>Module Plug 和 function Plug</h3><p>要写一个Plug很简单。首先以function plug为例子。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello_world_plug</span><span class="params">(conn, <span class="number">_</span>)</span></span> <span class="keyword">do</span></div><div class="line">  conn</div><div class="line">  <span class="params">|&gt; put_resp_content_type("text/plain")</span></div><div class="line">  |&gt; send_resp(<span class="number">200</span>, <span class="string">"Hello world"</span>)</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>任何第一个参数为Plug.connect struct，并返回Plug.connect struct的带两个参数的函数都可以function plug。<br>比如上例，我们向Plug.connect写入了一些http的header，最后返回一个带200 status，body为”Hello world”的 Plug.connect struct。<br>其实作为function的Plug，我们并不关心函数的第二个参数是什么。</p>
-<p>那么第二个参数是用来干什么的呢？ 那自然是Module的Plug中会用到。<br>所谓Module的Plug，需要实现两个函数。第一个是<code>init/1</code>函数，而第二个是<code>call/2</code>函数。<br>来看一眼<code>Plug.Session</code>的定义。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">defmodule Plug.Session <span class="keyword">do</span></div><div class="line"></div><div class="line">...</div><div class="line">...</div><div class="line"></div><div class="line"><span class="keyword">def</span> init(opts) <span class="keyword">do</span></div><div class="line">  <span class="keyword">store</span>        = Keyword.fetch!(opts, :<span class="keyword">store</span>) |&gt; convert_store</div><div class="line">  <span class="keyword">key</span>          = Keyword.fetch!(opts, :<span class="keyword">key</span>)</div><div class="line">  cookie_opts  = Keyword.take(opts, @cookie_opts)</div><div class="line">  store_opts   = Keyword.drop(opts, [:<span class="keyword">store</span>, :<span class="keyword">key</span>] ++ @cookie_opts)</div><div class="line">  store_config = store.init(store_opts)</div><div class="line"></div><div class="line">  %&#123;<span class="keyword">store</span>: <span class="keyword">store</span>,</div><div class="line">    store_config: store_config,</div><div class="line">    <span class="keyword">key</span>: <span class="keyword">key</span>,</div><div class="line">    cookie_opts: cookie_opts&#125;</div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line"><span class="keyword">def</span> <span class="keyword">call</span>(<span class="keyword">conn</span>, config) <span class="keyword">do</span></div><div class="line">  Conn.put_private(<span class="keyword">conn</span>, :plug_session_fetch, fetch_session(config))</div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line">...</div><div class="line">...</div></pre></td></tr></table></figure>
-<p>再来看看<code>Phoenix</code>框架中使用Plug.Session的例子。</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta"># lib/hello_phoenix/endpoint.ex</span></div><div class="line">plug Plug.Session,</div><div class="line"><span class="symbol">    store:</span> :cookie,</div><div class="line"><span class="symbol">    key:</span> <span class="string">"_hello_phoenix_key"</span>,</div><div class="line"><span class="symbol">    signing_salt:</span> <span class="string">"d8S1kdLV"</span></div></pre></td></tr></table></figure>
-<p>可以看到<code>init/1</code>函数的参数来自<code>plug plug_name, opts</code> 的<code>opts</code>。</p>
-<h3 id="Session-in-Cookie-的实装-Plug-Session-COOKIE"><a href="#Session-in-Cookie-的实装-Plug-Session-COOKIE" class="headerlink" title="Session in Cookie 的实装 Plug.Session.COOKIE"></a>Session in Cookie 的实装 Plug.Session.COOKIE</h3><p>Plug.Session 是如何开放接口提供调用Plug.Session.COOKIE中的方法呢。<br>首先Plug.Session 和Plug.Session.COOKIE虽然看起来前缀相同，但是Elixir中，module的是扁平的，也就是说，<br>这两个module没有一毛钱关系。</p>
-<p>注意看 Plug.Session 的 <code>init/1</code>函数，<code>store        = Keyword.fetch!(opts, :store) |&gt; convert_store</code><br>按照 <code>lib/hello_phoenix/endpoint.ex</code> 中的配置，<code>Keyword.fetch!(opts, :store)</code>的结果应该是<code>:cookie</code>。<br>那么store的结果就应该是<code>:cookie|&gt; convert_store</code>的结果了。</p>
-<p>终于是激动人心的<code>convert_store/1</code>了。</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">defp</span> <span class="title">convert_store</span></span>(store) <span class="keyword">do</span></div><div class="line">  <span class="keyword">case</span> Atom.to_string(store) <span class="keyword">do</span></div><div class="line">    <span class="string">"Elixir."</span> &lt;&gt; <span class="number">_</span> -&gt; store</div><div class="line">    reference      -&gt; Module.concat(Plug.Session, String.upcase(reference))</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>卧槽 <code>&quot;Elixir.&quot; &lt;&gt; _ -&gt; store</code>到底是什么？<br>再来复习一下Elixir的pattern match吧。</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> &#123;<span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>&#125; <span class="keyword">do</span></div><div class="line">  &#123;<span class="number">1</span>,x,<span class="number">4</span>&#125; -&gt; x</div><div class="line">  &#123;<span class="number">1</span>,<span class="number">4</span>,<span class="number">3</span>&#125; -&gt; y</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>在这个例子中，Elixir 会把 {1,3,4} 和 {1,x,4}进行 match。 这个时候，x匹配上了4。<br>再来看<code>&quot;Elixir.&quot; &lt;&gt; _ -&gt; store</code>， 其实就是，如果 store以 <code>Elixir.</code>开头，那么我们返回store。<br>当store为<code>:cookie</code>时候，条件落到第二个，<code>reference</code> 和 <code>:cookie</code>匹配， <code>case ...do</code>的返回结果则是将 <code>Plug.Session</code> 结合到 <code>&quot;cookie&quot;</code>前面，最后结果为<code>&quot;:Plug.Session.COOKIE&quot;</code>。</p>
-<p>哦，原来如此，这样使用<code>store.put/3</code>其实就是在调用<code>Plug.Session.COOKIE.put/3</code>了。<br>这样的话，我们就可以自由扩展<code>Plug.Session</code>来写我们自己的Session存贮了。<br>其实，Plug为Session的扩展提供了Protocol。</p>
-<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">defmodule</span> <span class="selector-tag">Plug</span><span class="selector-class">.Session</span><span class="selector-class">.Store</span> <span class="selector-tag">do</span></div><div class="line"></div><div class="line">  @<span class="selector-tag">callback</span> <span class="selector-tag">init</span>(Plug.opts) :: <span class="selector-tag">Plug</span><span class="selector-class">.opts</span></div><div class="line"></div><div class="line">  @<span class="selector-tag">callback</span> <span class="selector-tag">get</span>(Plug.Conn.t, cookie, Plug.opts) :: &#123;sid, session&#125;</div><div class="line"></div><div class="line">  <span class="variable">@callback</span> put(Plug.Conn.t, sid, any, Plug.opts) :: cookie</div><div class="line"></div><div class="line">  <span class="variable">@callback</span> delete(Plug.Conn.t, sid, Plug.opts) :: :ok</div><div class="line">end</div></pre></td></tr></table></figure>
-<h3 id="Thoughts"><a href="#Thoughts" class="headerlink" title="Thoughts"></a>Thoughts</h3><p>相比Rack，Plug借助一个神一般的struct <code>Plug.Conn</code> 实现了比Rack更方便的插拔性能。<br>据说Plug的函数实现每次需要带一个不用的参数其实也是神烦。不过不实际写一下还是没什么实感。<br>另外，个人感觉学习Phoenix框架的关键，除了理解Elixir自身，就是熟悉<code>Plug.Conn</code> 和 <code>Ecto.Changeset</code> 这两个东西了。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/10/30/20161030/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -322,6 +262,7 @@
 </div>
 
 </section>
+
 
 
                 <footer id="footer" class="main-content-wrap">

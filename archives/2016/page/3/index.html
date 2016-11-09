@@ -194,13 +194,62 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/03/05/20160305/">
+                            如何在devise中返回登陆前的页面
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Sat Mar 05 2016 07:44:08 GMT+0000">
+	
+		    3月 05, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <h3 id="如何在devise中返回登陆前的页面"><a href="#如何在devise中返回登陆前的页面" class="headerlink" title="如何在devise中返回登陆前的页面"></a>如何在devise中返回登陆前的页面</h3><p>还得从Rails的session说起。<br>最近在将项目的Rails版本从3.2升级到4.5，遇到了不少的坑。很多坑诞生于Monkey patch。比如一些gem提供的接口，<br>有些method的参数发生了改变，但是monkey patch没有来得及跟上。<br>还有一个很明显的变化就是Rails的session从一个简单的hash变成了较为复杂的结构。</p>
+<p>通常登录之后通过reset session来防止黑客通过XSS等方法伪造session id与用户共享session。<br>为了防止丢失之前session中的情报，我们需要在reset之后重新把原来session中的信息并入到新的session中去。<br>Rails3的做法是</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">temp_sess = session<span class="selector-class">.dup</span></div><div class="line">reset_session</div><div class="line">session.replace(temp_sess)</div></pre></td></tr></table></figure>
+<p>Rails3 中的session只是一个简单的Hash。所以可以简单地使用repace调包原来的session中的内容。<br>而到了Rails4中，session已经不是了原来的Hash。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#rails 4</span></div><div class="line"><span class="meta">&gt;&gt;</span> session.class</div><div class="line">=&gt; ActionDispatch::Request::Session</div></pre></td></tr></table></figure>
+<p>reset_session之后需要并入原来session中的内容的话，可以使用<code>ActionDispatch::Request::Session#merge!</code>方法。</p>
+<p>但是不管怎么说，session的本来目的就是来保存一些记录与客户端通信所需要的信息的key value存储。<br>与其它使用session_id来识别客户端的框架不同，Rails使用一个token将session加密并默认保存在cookie之中。<br>需要返回注册/登录的页面的时候，可以在session中先存入当时reference。devise通过注册验证之后跳转。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">## save reference into session after</span></div><div class="line">session[<span class="symbol">:return_to</span>] = request.fullpath</div><div class="line"><span class="comment">## redirect after login</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">after_sign_in_path_for</span><span class="params">(resource)</span></span></div><div class="line">  !!session[<span class="symbol">:return_to</span>] ? session.delete(<span class="symbol">:return_to</span>) : mypage_path</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/03/05/20160305/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/02/21/又是一年花粉弥漫/">
                             又是一年花粉弥漫
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 21 2016 17:34:51 GMT+0900">
+    <time itemprop="datePublished" content="Sun Feb 21 2016 08:34:51 GMT+0000">
 	
 		    2月 21, 2016
     	
@@ -249,7 +298,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Feb 17 2016 23:24:08 GMT+0900">
+    <time itemprop="datePublished" content="Wed Feb 17 2016 14:24:08 GMT+0000">
 	
 		    2月 17, 2016
     	
@@ -291,7 +340,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 14 2016 22:08:07 GMT+0900">
+    <time itemprop="datePublished" content="Sun Feb 14 2016 13:08:07 GMT+0000">
 	
 		    2月 14, 2016
     	
@@ -355,7 +404,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Feb 13 2016 16:54:12 GMT+0900">
+    <time itemprop="datePublished" content="Sat Feb 13 2016 07:54:12 GMT+0000">
 	
 		    2月 13, 2016
     	

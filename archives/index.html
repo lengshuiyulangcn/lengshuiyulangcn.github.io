@@ -194,13 +194,78 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/11/09/20161109/">
+                            Meta Programming Elixir 笔记 1
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Wed Nov 09 2016 12:44:08 GMT+0000">
+	
+		    11月 09, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <p>unquote在Elixir的meta programming中非常常见。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Unless</span></span> <span class="keyword">do</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">fun_unless</span></span>(clause, <span class="symbol">do:</span> expression) <span class="keyword">do</span></div><div class="line">    if(!clause, <span class="symbol">do:</span> expression)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">defmacro</span> <span class="title">macro_unless</span></span>(clause, <span class="symbol">do:</span> expression) <span class="keyword">do</span></div><div class="line">    <span class="keyword">quote</span> <span class="keyword">do</span></div><div class="line">      if(!unquote(clause), <span class="symbol">do:</span> unquote(expression))</div><div class="line">    <span class="keyword">end</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p><code>defmacro</code> 和 <code>def</code> 不同之处在于 <code>defmacro</code>定义的marco的参数是AST。<br>也就是说上面的例子，在<code>defmacro</code>中，<code>clause</code> 和 <code>expression</code>都是以AST的形式存在。</p>
+<p><code>quote...do</code> 返回的结果也是AST。于是，macro其实就是接受AST，然后返回AST的机制而已。<br>unquote可以对AST进行评价。<code>unquote(clause)</code>结果自然是<code>true or false</code>。 <code>unquote(expression)</code>结果自然是一个variable。<br>由于<code>if</code>也是由macro实现，于是进一步，我们将得到一个非常原始的AST。</p>
+<p>OK， unquote我懂了。</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">iex(<span class="number">3</span>)&gt; unquote(<span class="string">"wwww"</span>)</div><div class="line">** (CompileError) iex:<span class="number">3</span>: unquote called outside <span class="literal">quote</span></div></pre></td></tr></table></figure>
+<p>啊，友好的提示信息告诉我们，unquote必须用在quote里面。这个貌似也能理解。但是，我们时常看到有些unquote并不是在quote里面呀。比如</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MyTest</span></span> <span class="keyword">do</span></div><div class="line">   a = <span class="string">"www"</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">fun_unless</span></span> <span class="keyword">do</span></div><div class="line">    unquote(a)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>编译也顺利通过了。这到底是肿么回事。大家的结论是，<code>def</code>其实也是一个macro。<code>def...do</code>的内容会在一个非显式的quote中展开，所以萌大奶。</p>
+<p>那么我们还时常看到这种用法。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Hello</span></span> <span class="keyword">do</span></div><div class="line">  [<span class="symbol">:alice</span>, <span class="symbol">:bob</span>] |&gt; Enum.each <span class="keyword">fn</span> name -&gt;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">unquote</span></span>(<span class="symbol">:<span class="string">"hello_<span class="subst">#&#123;name&#125;</span>"</span></span>)() <span class="keyword">do</span></div><div class="line">      IO.inspect(<span class="string">"Hello <span class="subst">#&#123;unquote(name)&#125;</span>"</span>)</div><div class="line">    <span class="keyword">end</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>这个时候就是在编辑阶段动态定义函数了。文档中，这种用法被叫做unquote fragments。<br>那么，为什么这个<code>name</code>在<code>def</code>中需要unquote呢？ 因为这个name在一个非显式的quote中(def unquote…do)。</p>
+<h3 id="Macro-escape"><a href="#Macro-escape" class="headerlink" title="Macro.escape"></a>Macro.escape</h3><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Module1</span></span> <span class="keyword">do</span></div><div class="line">  p = Macro.escape(%&#123;<span class="symbol">name:</span> <span class="string">"hoge"</span>&#125;)</div><div class="line">  string = <span class="string">"abc"</span></div><div class="line">  a = <span class="number">1</span></div><div class="line">  b = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">func1</span></span>(unquote(p)) <span class="keyword">do</span></div><div class="line">    unquote(p)</div><div class="line">    unquote(string)</div><div class="line">    unquote(a)</div><div class="line">    unquote(b)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>懵了。为什么<code>a,b,string</code>这些东西不需要<code>Macro.escape</code>, 而<code>p</code>需要呢？</p>
+<p>按照文档的说法，</p>
+<blockquote>
+<p> it is important to make a distinction between a regular Elixir value (like a list, a map, a process, a reference, etc) and a quoted expression. Some values, such as integers, atoms and strings, have a quoted expression equal to the value itself. Other values, like maps, need to be explicitly converted.</p>
+</blockquote>
+<p>这是神马意思？</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">iex</span>(<span class="number">8</span>)&gt; <span class="selector-tag">quote</span> <span class="selector-tag">do</span></div><div class="line">...(<span class="number">8</span>)&gt; <span class="selector-tag">1</span></div><div class="line">...(<span class="number">8</span>)&gt; <span class="selector-tag">end</span></div><div class="line"><span class="selector-tag">1</span></div><div class="line"></div><div class="line"><span class="selector-tag">iex</span>(<span class="number">9</span>)&gt; <span class="selector-tag">quote</span> <span class="selector-tag">do</span></div><div class="line">...(<span class="number">9</span>)&gt; %&#123;<span class="attribute">name</span>: <span class="string">"www"</span>&#125;</div><div class="line">...(<span class="number">9</span>)&gt; <span class="selector-tag">end</span></div><div class="line">&#123;:%&#123;&#125;, <span class="selector-attr">[]</span>, <span class="selector-attr">[name: "www"]</span>&#125;</div></pre></td></tr></table></figure>
+<p>就是这个意思。 1 的 quote expression 还是 1， 而 <code>%{name: &quot;www&quot;}</code>的quote expression则是 <code>{:%{}, [], [name: &quot;www&quot;]}</code><br><code>Macro.escape</code>的作用就是把value转换成quote expression。</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">iex</span>(<span class="number">10</span>)&gt; <span class="selector-tag">Macro</span><span class="selector-class">.escape</span>(%&#123;<span class="attribute">name</span>: <span class="string">"wwww"</span>&#125;)</div><div class="line">&#123;:%&#123;&#125;, [], [<span class="attribute">name</span>: <span class="string">"wwww"</span>]&#125;</div><div class="line">iex(<span class="number">11</span>)&gt; Macro.escape(<span class="number">1</span>)</div><div class="line"><span class="number">1</span></div></pre></td></tr></table></figure>
+<p>由于定义macro的时候，在<code>quote...do</code>中我们需要用<code>unquote</code>去评价 quote expression。所以，先得把map这种类型转换成quote expression。</p>
+<p>Elixir meta programming 算是扫完一遍了。需要完全消化看来还要很久。</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/11/09/20161109/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/10/30/20161030/">
                             俗而不凡的Plug
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 30 2016 23:58:05 GMT+0900">
+    <time itemprop="datePublished" content="Sun Oct 30 2016 14:58:05 GMT+0000">
 	
 		    10月 30, 2016
     	
@@ -260,7 +325,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue Oct 11 2016 23:34:37 GMT+0900">
+    <time itemprop="datePublished" content="Tue Oct 11 2016 14:34:37 GMT+0000">
 	
 		    10月 11, 2016
     	
@@ -317,7 +382,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 02 2016 22:09:40 GMT+0900">
+    <time itemprop="datePublished" content="Sun Oct 02 2016 13:09:40 GMT+0000">
 	
 		    10月 02, 2016
     	
@@ -388,7 +453,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Sep 22 2016 12:59:57 GMT+0900">
+    <time itemprop="datePublished" content="Thu Sep 22 2016 03:59:57 GMT+0000">
 	
 		    9月 22, 2016
     	
@@ -440,7 +505,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 10 2016 19:42:35 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jul 10 2016 10:42:35 GMT+0000">
 	
 		    7月 10, 2016
     	
@@ -503,7 +568,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 03 2016 22:06:28 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jul 03 2016 13:06:28 GMT+0000">
 	
 		    7月 03, 2016
     	
@@ -556,7 +621,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 26 2016 18:32:22 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jun 26 2016 09:32:22 GMT+0000">
 	
 		    6月 26, 2016
     	
@@ -610,15 +675,15 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
-                        <a class="link-unstyled" href="/2016/06/16/20160615/">
+                        <a class="link-unstyled" href="/2016/06/15/20160615/">
                             我们也许并不合适
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Jun 16 2016 00:40:06 GMT+0900">
+    <time itemprop="datePublished" content="Wed Jun 15 2016 15:40:06 GMT+0000">
 	
-		    6月 16, 2016
+		    6月 15, 2016
     	
     </time>
     
@@ -644,7 +709,7 @@
                     
                     
                         <p>
-                            <a href="/2016/06/16/20160615/#post-footer" class="postShorten-excerpt_link link">
+                            <a href="/2016/06/15/20160615/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
@@ -667,7 +732,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 05 2016 21:28:51 GMT+0900">
+    <time itemprop="datePublished" content="Sun Jun 05 2016 12:28:51 GMT+0000">
 	
 		    6月 05, 2016
     	
@@ -708,80 +773,6 @@
                     
                         <p>
                             <a href="/2016/06/05/20160605/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/05/31/20160531-md/">
-                            rack 中间件 warden 的机制
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue May 31 2016 22:37:52 GMT+0900">
-	
-		    5月 31, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>说到warden，大概很多人感觉很陌生。然而很多人耳熟能详的Devise就恰恰是基于warden构建的。<br>所以当我们customize Devise的一些功能的时候常常看到有warden这个关键词的出现。<br>要深入了解Devise的验证机制，不如先从了解warden这个东西入手。</p>
-<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>warden在rack中间件的堆放位置大抵位于session下流。</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">Rack:</span><span class="symbol">:Builder</span>.new <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> <span class="symbol">Rack:</span><span class="symbol">:Session</span><span class="symbol">:</span><span class="symbol">:Cookie</span>, <span class="symbol">:secret</span> =&gt; <span class="string">"replace this with some secret key"</span></div><div class="line"></div><div class="line">  <span class="keyword">use</span> <span class="symbol">Warden:</span><span class="symbol">:Manager</span> <span class="keyword">do</span> |manager|</div><div class="line">    manager.default_strategies <span class="symbol">:password</span>, <span class="symbol">:basic</span></div><div class="line">    manager.failure_app = BadAuthenticationEndsUpHere</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  run SomeApp</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>其中，default_strategies 是warden默认使用的验证策略。而failure_app则是当验证失败的时候处理相关内容的中间件。</p>
-<p>使用warden来验证用户很简单。基本就是以下几个用法。</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticated</span>?               # <span class="selector-tag">request</span>是否已经验证</div><div class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticated</span>?(<span class="selector-pseudo">:foo)</span>         # 在<span class="selector-tag">scope</span> <span class="selector-tag">foo</span> 中<span class="selector-tag">request</span>是否已经验证</div><div class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticate</span>(<span class="selector-pseudo">:password)</span>      # 试着用<span class="selector-tag">password</span> <span class="selector-tag">strategy</span>来验证，不过就算验证不通过也会继续执行</div><div class="line"><span class="selector-tag">env</span><span class="selector-attr">['warden']</span><span class="selector-class">.authenticate</span>!(<span class="selector-pseudo">:password)</span>     # 同上，但是验证不通过就会被<span class="selector-tag">failure_app</span>处理</div></pre></td></tr></table></figure>
-<p>要注意的是，warden并不会主动来验证并拒绝request。只有当我们调用以上的验证方法的时候，warden才会横空挡路。<br>这也就是为什么我们使用devise的时候，通常在controller的before_action hook下面写上<code>authorize_user!</code>的原因了。</p>
-<p>如果request通过验证，我们就可以通过<code>env[&#39;warden&#39;].user</code>来获取用户的instance。那warden是肿么获取用户的instance的呢？当然我们得告诉他。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#1</span></div><div class="line">Warden::Manager.serialize_into_session <span class="keyword">do</span> <span class="params">|user|</span></div><div class="line">  user.id</div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line"><span class="comment">#2</span></div><div class="line">Warden::Manager.serialize_from_session <span class="keyword">do</span> <span class="params">|id|</span></div><div class="line">  User.get(id)</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>其实很一目了然。request通过验证之后，在＃1中我们将用户的id写到session里面去。而后在#2中我们自然就可以获取用户的id，从而获取用户的instance。</p>
-<h3 id="strategy策略"><a href="#strategy策略" class="headerlink" title="strategy策略"></a>strategy策略</h3><p>warden 通过strategy来定义用户验证策略。<br>我们来看一下password strategy的实现。</p>
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Warden::Strategies.add(<span class="symbol">:password</span>) <span class="keyword">do</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">valid?</span></span></div><div class="line">    params[<span class="string">'username'</span>] <span class="params">||</span> params[<span class="string">'password'</span>]</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">authenticate!</span></span></div><div class="line">    u = User.authenticate(params[<span class="string">'username'</span>], params[<span class="string">'password'</span>])</div><div class="line">    u.<span class="literal">nil</span>? ? fail!(<span class="string">"Could not log in"</span>) : success!(u)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>valid?方法作为strategy的哨兵，在验证策略发动前进行一些检查。如果不写这个方法，那么strategy总是会发送。</p>
-<p>authenticate!则是真正验证的方法。比如上面的例子里面我们看到其调用了User的authenticate方法对用户名密码进行验证。</p>
-<p>在验证的时候我们可以用到的一些方法有</p>
-<ul>
-<li>request – Rack::Request object</li>
-<li>session – The session object for the request</li>
-<li>params – The parameters of the request</li>
-<li>env – The Rack env object</li>
-</ul>
-<p>比如上面我们用params获取了传来的用户名和密码参数。</p>
-<p>进行验证之后，根据验证结果，我们可以有一下处理。</p>
-<ul>
-<li>halt! – 停止接下来所有的strategy。当前的strategy会作为最后一个策略。</li>
-<li>pass – 直接忽略次策略。当然不推荐就是了。ignore this strategy. It is not required to call this and this is only sugar.</li>
-<li>success! – 策略成功。因为warden的策略有一个成功即会停止，所以紧接着会造成halt!也发动。</li>
-<li>fail! – 策略失败。并发动halt！</li>
-<li>redirect! – 跳转到另一个url。同样发动halt!</li>
-<li>custom! – 返回一个自定义的rack array并造成halt!</li>
-</ul>
-<h3 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h3><p>当Devise太重的时候我们完全可以通过定制自己的warden strategy来定制我们自己的用户验证机制。</p>
-<p>Rack的层层堆砌逐渐由模糊到清晰起来。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/05/31/20160531-md/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>

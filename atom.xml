@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.bocchi.tokyo/"/>
-  <updated>2016-10-30T15:01:04.000Z</updated>
+  <updated>2016-11-09T12:51:18.000Z</updated>
   <id>http://blog.bocchi.tokyo/</id>
   
   <author>
@@ -14,6 +14,53 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Meta Programming Elixir 笔记 1</title>
+    <link href="http://blog.bocchi.tokyo/2016/11/09/20161109/"/>
+    <id>http://blog.bocchi.tokyo/2016/11/09/20161109/</id>
+    <published>2016-11-09T12:44:08.000Z</published>
+    <updated>2016-11-09T12:51:18.000Z</updated>
+    
+    <content type="html">&lt;p&gt;unquote在Elixir的meta programming中非常常见。&lt;/p&gt;
+&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;defmodule&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Unless&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;fun_unless&lt;/span&gt;&lt;/span&gt;(clause, &lt;span class=&quot;symbol&quot;&gt;do:&lt;/span&gt; expression) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    if(!clause, &lt;span class=&quot;symbol&quot;&gt;do:&lt;/span&gt; expression)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;defmacro&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;macro_unless&lt;/span&gt;&lt;/span&gt;(clause, &lt;span class=&quot;symbol&quot;&gt;do:&lt;/span&gt; expression) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;quote&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;      if(!unquote(clause), &lt;span class=&quot;symbol&quot;&gt;do:&lt;/span&gt; unquote(expression))&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;code&gt;defmacro&lt;/code&gt; 和 &lt;code&gt;def&lt;/code&gt; 不同之处在于 &lt;code&gt;defmacro&lt;/code&gt;定义的marco的参数是AST。&lt;br&gt;也就是说上面的例子，在&lt;code&gt;defmacro&lt;/code&gt;中，&lt;code&gt;clause&lt;/code&gt; 和 &lt;code&gt;expression&lt;/code&gt;都是以AST的形式存在。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;quote...do&lt;/code&gt; 返回的结果也是AST。于是，macro其实就是接受AST，然后返回AST的机制而已。&lt;br&gt;unquote可以对AST进行评价。&lt;code&gt;unquote(clause)&lt;/code&gt;结果自然是&lt;code&gt;true or false&lt;/code&gt;。 &lt;code&gt;unquote(expression)&lt;/code&gt;结果自然是一个variable。&lt;br&gt;由于&lt;code&gt;if&lt;/code&gt;也是由macro实现，于是进一步，我们将得到一个非常原始的AST。&lt;/p&gt;
+&lt;p&gt;OK， unquote我懂了。&lt;/p&gt;
+&lt;figure class=&quot;highlight applescript&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;iex(&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;)&amp;gt; unquote(&lt;span class=&quot;string&quot;&gt;&quot;wwww&quot;&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;** (CompileError) iex:&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;: unquote called outside &lt;span class=&quot;literal&quot;&gt;quote&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;啊，友好的提示信息告诉我们，unquote必须用在quote里面。这个貌似也能理解。但是，我们时常看到有些unquote并不是在quote里面呀。比如&lt;/p&gt;
+&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;defmodule&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;MyTest&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;   a = &lt;span class=&quot;string&quot;&gt;&quot;www&quot;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;fun_unless&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    unquote(a)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;编译也顺利通过了。这到底是肿么回事。大家的结论是，&lt;code&gt;def&lt;/code&gt;其实也是一个macro。&lt;code&gt;def...do&lt;/code&gt;的内容会在一个非显式的quote中展开，所以萌大奶。&lt;/p&gt;
+&lt;p&gt;那么我们还时常看到这种用法。&lt;/p&gt;
+&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;defmodule&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Hello&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  [&lt;span class=&quot;symbol&quot;&gt;:alice&lt;/span&gt;, &lt;span class=&quot;symbol&quot;&gt;:bob&lt;/span&gt;] |&amp;gt; Enum.each &lt;span class=&quot;keyword&quot;&gt;fn&lt;/span&gt; name -&amp;gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;unquote&lt;/span&gt;&lt;/span&gt;(&lt;span class=&quot;symbol&quot;&gt;:&lt;span class=&quot;string&quot;&gt;&quot;hello_&lt;span class=&quot;subst&quot;&gt;#&amp;#123;name&amp;#125;&lt;/span&gt;&quot;&lt;/span&gt;&lt;/span&gt;)() &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;      IO.inspect(&lt;span class=&quot;string&quot;&gt;&quot;Hello &lt;span class=&quot;subst&quot;&gt;#&amp;#123;unquote(name)&amp;#125;&lt;/span&gt;&quot;&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;这个时候就是在编辑阶段动态定义函数了。文档中，这种用法被叫做unquote fragments。&lt;br&gt;那么，为什么这个&lt;code&gt;name&lt;/code&gt;在&lt;code&gt;def&lt;/code&gt;中需要unquote呢？ 因为这个name在一个非显式的quote中(def unquote…do)。&lt;/p&gt;
+&lt;h3 id=&quot;Macro-escape&quot;&gt;&lt;a href=&quot;#Macro-escape&quot; class=&quot;headerlink&quot; title=&quot;Macro.escape&quot;&gt;&lt;/a&gt;Macro.escape&lt;/h3&gt;&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;defmodule&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Module1&lt;/span&gt;&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  p = Macro.escape(%&amp;#123;&lt;span class=&quot;symbol&quot;&gt;name:&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;hoge&quot;&lt;/span&gt;&amp;#125;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  string = &lt;span class=&quot;string&quot;&gt;&quot;abc&quot;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  a = &lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  b = [&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;,&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;]&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;func1&lt;/span&gt;&lt;/span&gt;(unquote(p)) &lt;span class=&quot;keyword&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    unquote(p)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    unquote(string)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    unquote(a)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    unquote(b)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  &lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;懵了。为什么&lt;code&gt;a,b,string&lt;/code&gt;这些东西不需要&lt;code&gt;Macro.escape&lt;/code&gt;, 而&lt;code&gt;p&lt;/code&gt;需要呢？&lt;/p&gt;
+&lt;p&gt;按照文档的说法，&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt; it is important to make a distinction between a regular Elixir value (like a list, a map, a process, a reference, etc) and a quoted expression. Some values, such as integers, atoms and strings, have a quoted expression equal to the value itself. Other values, like maps, need to be explicitly converted.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这是神马意思？&lt;/p&gt;
+&lt;figure class=&quot;highlight less&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;selector-tag&quot;&gt;iex&lt;/span&gt;(&lt;span class=&quot;number&quot;&gt;8&lt;/span&gt;)&amp;gt; &lt;span class=&quot;selector-tag&quot;&gt;quote&lt;/span&gt; &lt;span class=&quot;selector-tag&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...(&lt;span class=&quot;number&quot;&gt;8&lt;/span&gt;)&amp;gt; &lt;span class=&quot;selector-tag&quot;&gt;1&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...(&lt;span class=&quot;number&quot;&gt;8&lt;/span&gt;)&amp;gt; &lt;span class=&quot;selector-tag&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;selector-tag&quot;&gt;1&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;selector-tag&quot;&gt;iex&lt;/span&gt;(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;)&amp;gt; &lt;span class=&quot;selector-tag&quot;&gt;quote&lt;/span&gt; &lt;span class=&quot;selector-tag&quot;&gt;do&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;)&amp;gt; %&amp;#123;&lt;span class=&quot;attribute&quot;&gt;name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&quot;www&quot;&lt;/span&gt;&amp;#125;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;...(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;)&amp;gt; &lt;span class=&quot;selector-tag&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&amp;#123;:%&amp;#123;&amp;#125;, &lt;span class=&quot;selector-attr&quot;&gt;[]&lt;/span&gt;, &lt;span class=&quot;selector-attr&quot;&gt;[name: &quot;www&quot;]&lt;/span&gt;&amp;#125;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;就是这个意思。 1 的 quote expression 还是 1， 而 &lt;code&gt;%{name: &amp;quot;www&amp;quot;}&lt;/code&gt;的quote expression则是 &lt;code&gt;{:%{}, [], [name: &amp;quot;www&amp;quot;]}&lt;/code&gt;&lt;br&gt;&lt;code&gt;Macro.escape&lt;/code&gt;的作用就是把value转换成quote expression。&lt;/p&gt;
+&lt;figure class=&quot;highlight less&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;selector-tag&quot;&gt;iex&lt;/span&gt;(&lt;span class=&quot;number&quot;&gt;10&lt;/span&gt;)&amp;gt; &lt;span class=&quot;selector-tag&quot;&gt;Macro&lt;/span&gt;&lt;span class=&quot;selector-class&quot;&gt;.escape&lt;/span&gt;(%&amp;#123;&lt;span class=&quot;attribute&quot;&gt;name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&quot;wwww&quot;&lt;/span&gt;&amp;#125;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&amp;#123;:%&amp;#123;&amp;#125;, [], [&lt;span class=&quot;attribute&quot;&gt;name&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&quot;wwww&quot;&lt;/span&gt;]&amp;#125;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;iex(&lt;span class=&quot;number&quot;&gt;11&lt;/span&gt;)&amp;gt; Macro.escape(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;由于定义macro的时候，在&lt;code&gt;quote...do&lt;/code&gt;中我们需要用&lt;code&gt;unquote&lt;/code&gt;去评价 quote expression。所以，先得把map这种类型转换成quote expression。&lt;/p&gt;
+&lt;p&gt;Elixir meta programming 算是扫完一遍了。需要完全消化看来还要很久。&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;unquote在Elixir的meta programming中非常常见。&lt;/p&gt;
+&lt;figure class=&quot;highlight elixir&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;d
+    
+    </summary>
+    
+    
+      <category term="Elixir" scheme="http://blog.bocchi.tokyo/tags/Elixir/"/>
+    
+      <category term="Meta Programming" scheme="http://blog.bocchi.tokyo/tags/Meta-Programming/"/>
+    
+  </entry>
   
   <entry>
     <title>俗而不凡的Plug</title>
@@ -256,11 +303,11 @@
     
       <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
     
-      <category term="ActionCable" scheme="http://blog.bocchi.tokyo/tags/ActionCable/"/>
-    
       <category term="Redux" scheme="http://blog.bocchi.tokyo/tags/Redux/"/>
     
       <category term="React" scheme="http://blog.bocchi.tokyo/tags/React/"/>
+    
+      <category term="ActionCable" scheme="http://blog.bocchi.tokyo/tags/ActionCable/"/>
     
   </entry>
   
@@ -310,8 +357,8 @@
   
   <entry>
     <title>我们也许并不合适</title>
-    <link href="http://blog.bocchi.tokyo/2016/06/16/20160615/"/>
-    <id>http://blog.bocchi.tokyo/2016/06/16/20160615/</id>
+    <link href="http://blog.bocchi.tokyo/2016/06/15/20160615/"/>
+    <id>http://blog.bocchi.tokyo/2016/06/15/20160615/</id>
     <published>2016-06-15T15:40:06.000Z</published>
     <updated>2016-06-15T15:46:32.000Z</updated>
     
@@ -539,8 +586,8 @@
   
   <entry>
     <title>东京一年</title>
-    <link href="http://blog.bocchi.tokyo/2016/03/28/20160327/"/>
-    <id>http://blog.bocchi.tokyo/2016/03/28/20160327/</id>
+    <link href="http://blog.bocchi.tokyo/2016/03/27/20160327/"/>
+    <id>http://blog.bocchi.tokyo/2016/03/27/20160327/</id>
     <published>2016-03-27T15:49:34.000Z</published>
     <updated>2016-03-27T15:50:23.000Z</updated>
     
@@ -762,34 +809,6 @@
       <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
     
       <category term="Devise" scheme="http://blog.bocchi.tokyo/tags/Devise/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>如何在devise中返回登陆前的页面</title>
-    <link href="http://blog.bocchi.tokyo/2016/03/05/20160305/"/>
-    <id>http://blog.bocchi.tokyo/2016/03/05/20160305/</id>
-    <published>2016-03-05T07:44:08.000Z</published>
-    <updated>2016-03-05T07:45:14.000Z</updated>
-    
-    <content type="html">&lt;h3 id=&quot;如何在devise中返回登陆前的页面&quot;&gt;&lt;a href=&quot;#如何在devise中返回登陆前的页面&quot; class=&quot;headerlink&quot; title=&quot;如何在devise中返回登陆前的页面&quot;&gt;&lt;/a&gt;如何在devise中返回登陆前的页面&lt;/h3&gt;&lt;p&gt;还得从Rails的session说起。&lt;br&gt;最近在将项目的Rails版本从3.2升级到4.5，遇到了不少的坑。很多坑诞生于Monkey patch。比如一些gem提供的接口，&lt;br&gt;有些method的参数发生了改变，但是monkey patch没有来得及跟上。&lt;br&gt;还有一个很明显的变化就是Rails的session从一个简单的hash变成了较为复杂的结构。&lt;/p&gt;
-&lt;p&gt;通常登录之后通过reset session来防止黑客通过XSS等方法伪造session id与用户共享session。&lt;br&gt;为了防止丢失之前session中的情报，我们需要在reset之后重新把原来session中的信息并入到新的session中去。&lt;br&gt;Rails3的做法是&lt;/p&gt;
-&lt;figure class=&quot;highlight stylus&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;temp_sess = session&lt;span class=&quot;selector-class&quot;&gt;.dup&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;reset_session&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;session.replace(temp_sess)&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;Rails3 中的session只是一个简单的Hash。所以可以简单地使用repace调包原来的session中的内容。&lt;br&gt;而到了Rails4中，session已经不是了原来的Hash。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;#rails 4&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; session.class&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;=&amp;gt; ActionDispatch::Request::Session&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;reset_session之后需要并入原来session中的内容的话，可以使用&lt;code&gt;ActionDispatch::Request::Session#merge!&lt;/code&gt;方法。&lt;/p&gt;
-&lt;p&gt;但是不管怎么说，session的本来目的就是来保存一些记录与客户端通信所需要的信息的key value存储。&lt;br&gt;与其它使用session_id来识别客户端的框架不同，Rails使用一个token将session加密并默认保存在cookie之中。&lt;br&gt;需要返回注册/登录的页面的时候，可以在session中先存入当时reference。devise通过注册验证之后跳转。&lt;/p&gt;
-&lt;figure class=&quot;highlight ruby&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;## save reference into session after&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;session[&lt;span class=&quot;symbol&quot;&gt;:return_to&lt;/span&gt;] = request.fullpath&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;## redirect after login&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;after_sign_in_path_for&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(resource)&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;  !!session[&lt;span class=&quot;symbol&quot;&gt;:return_to&lt;/span&gt;] ? session.delete(&lt;span class=&quot;symbol&quot;&gt;:return_to&lt;/span&gt;) : mypage_path&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;end&lt;/span&gt;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;h3 id=&quot;如何在devise中返回登陆前的页面&quot;&gt;&lt;a href=&quot;#如何在devise中返回登陆前的页面&quot; class=&quot;headerlink&quot; title=&quot;如何在devise中返回登陆前的页面&quot;&gt;&lt;/a&gt;如何在devise中返回登陆前的页面&lt;/h3&gt;&lt;p&gt;还得从Rai
-    
-    </summary>
-    
-    
-      <category term="Rails" scheme="http://blog.bocchi.tokyo/tags/Rails/"/>
     
   </entry>
   
