@@ -194,13 +194,62 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/03/07/20160307/">
+                            使用devise进行用户验证后的post redirect
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Mon Mar 07 2016 14:56:21 GMT+0000">
+	
+		    3月 07, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <p>有些时候我们想要实现当未登录用户点击报名某个活动的时候，能够跳转到登录界面，输入正确的用户信息之后直接跳转回来，并已经完成报名。<br>把思路理一下就是需要在登录之后redirect到一个post方法。<br>那在Rails中使用devise做user auth的时候，如何实现呢？</p>
+<p>首先Rails根本不支持post的redirect。于是我们别做梦了，老老实实修改user case？<br>嘛其实这个问题，当我们想千方百计redirect回原来的post方法的时候就已经把自己设计套死了。</p>
+<p>重新审视一下我们的要求，很简单，就是要在点击报名之后，如果未登录，则跳转登录，然后登录之后自动完成报名。<br>之前的post方法也只不过是我们在用户已经登录的情况下完成报名的一种手段而已罢了。<br>我们完全可以在登录之后顺便将报名情况写进数据库，然后跳转回原来报名链接所在的页面，这样也就和报名无异了。<br>而报名所需要的event id以及报名链接所在页面的url就直接存入session即可。</p>
+<p>devise允许我们customize。所以这次我们直接重载devise 的session controller。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Users::SessionsController</span> &lt; Devise::SessionsController</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">create</span></span></div><div class="line">    <span class="keyword">self</span>.resource = warden.authenticate!(auth_options)</div><div class="line">    set_flash_message(<span class="symbol">:notice</span>, <span class="symbol">:signed_in</span>)</div><div class="line">    sign_in(resource_name, resource)</div><div class="line">    <span class="keyword">yield</span> resource <span class="keyword">if</span> block_given?</div><div class="line">    <span class="keyword">if</span> session[<span class="symbol">:event_id</span>]</div><div class="line">      apply_event</div><div class="line">      <span class="keyword">return</span></div><div class="line">    <span class="keyword">else</span></div><div class="line">      respond_with resource, <span class="symbol">location:</span> after_sign_in_path_for(resource)</div><div class="line">    <span class="keyword">end</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  private</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">apply_event</span></span></div><div class="line">    event_id = session.delete(<span class="symbol">:event_id</span>)</div><div class="line">    <span class="comment"># create and write into db</span></div><div class="line">    <span class="comment">#....</span></div><div class="line">    redirect_to event_detail_path(event_id)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<p>当然别忘了在<code>router</code>的config中加入重载的配置。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">devise_for <span class="symbol">:users</span>, <span class="symbol">:controllers</span> =&gt; &#123; <span class="symbol">:sessions</span> =&gt; <span class="string">'users/sessions'</span> &#125;</div></pre></td></tr></table></figure>
+<p>果然还是应该冷静下来后退几步。</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/03/07/20160307/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/03/05/20160305/">
                             如何在devise中返回登陆前的页面
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Mar 05 2016 16:44:08 GMT+0900">
+    <time itemprop="datePublished" content="Sat Mar 05 2016 07:44:08 GMT+0000">
 	
 		    3月 05, 2016
     	
@@ -249,7 +298,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 21 2016 17:34:51 GMT+0900">
+    <time itemprop="datePublished" content="Sun Feb 21 2016 08:34:51 GMT+0000">
 	
 		    2月 21, 2016
     	
@@ -298,7 +347,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Feb 17 2016 23:24:08 GMT+0900">
+    <time itemprop="datePublished" content="Wed Feb 17 2016 14:24:08 GMT+0000">
 	
 		    2月 17, 2016
     	
@@ -340,7 +389,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Feb 14 2016 22:08:07 GMT+0900">
+    <time itemprop="datePublished" content="Sun Feb 14 2016 13:08:07 GMT+0000">
 	
 		    2月 14, 2016
     	
@@ -404,7 +453,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sat Feb 13 2016 16:54:12 GMT+0900">
+    <time itemprop="datePublished" content="Sat Feb 13 2016 07:54:12 GMT+0000">
 	
 		    2月 13, 2016
     	

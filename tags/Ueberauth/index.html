@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Gyorouのぼっち日記">
-    <title>归档: 2016/11 - Gyorouのぼっち日記</title>
+    <title>标签: Ueberauth - Gyorouのぼっち日記</title>
     <meta name="author" content="Gyorou">
     
     
@@ -15,7 +15,7 @@
     
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Gyorouのぼっち日記">
-<meta property="og:url" content="http://blog.bocchi.tokyo/archives/2016/11/index.html">
+<meta property="og:url" content="http://blog.bocchi.tokyo/tags/Ueberauth/index.html">
 <meta property="og:site_name" content="Gyorouのぼっち日記">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gyorouのぼっち日記">
@@ -257,71 +257,6 @@
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/11/09/20161109/">
-                            Meta Programming Elixir 笔记 1
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Nov 09 2016 12:44:08 GMT+0000">
-	
-		    11月 09, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>unquote在Elixir的meta programming中非常常见。</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Unless</span></span> <span class="keyword">do</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">fun_unless</span></span>(clause, <span class="symbol">do:</span> expression) <span class="keyword">do</span></div><div class="line">    if(!clause, <span class="symbol">do:</span> expression)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">defmacro</span> <span class="title">macro_unless</span></span>(clause, <span class="symbol">do:</span> expression) <span class="keyword">do</span></div><div class="line">    <span class="keyword">quote</span> <span class="keyword">do</span></div><div class="line">      if(!unquote(clause), <span class="symbol">do:</span> unquote(expression))</div><div class="line">    <span class="keyword">end</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p><code>defmacro</code> 和 <code>def</code> 不同之处在于 <code>defmacro</code>定义的marco的参数是AST。<br>也就是说上面的例子，在<code>defmacro</code>中，<code>clause</code> 和 <code>expression</code>都是以AST的形式存在。</p>
-<p><code>quote...do</code> 返回的结果也是AST。于是，macro其实就是接受AST，然后返回AST的机制而已。<br>unquote可以对AST进行评价。<code>unquote(clause)</code>结果自然是<code>true or false</code>。 <code>unquote(expression)</code>结果自然是一个variable。<br>由于<code>if</code>也是由macro实现，于是进一步，我们将得到一个非常原始的AST。</p>
-<p>OK， unquote我懂了。</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">iex(<span class="number">3</span>)&gt; unquote(<span class="string">"wwww"</span>)</div><div class="line">** (CompileError) iex:<span class="number">3</span>: unquote called outside <span class="literal">quote</span></div></pre></td></tr></table></figure>
-<p>啊，友好的提示信息告诉我们，unquote必须用在quote里面。这个貌似也能理解。但是，我们时常看到有些unquote并不是在quote里面呀。比如</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MyTest</span></span> <span class="keyword">do</span></div><div class="line">   a = <span class="string">"www"</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">fun_unless</span></span> <span class="keyword">do</span></div><div class="line">    unquote(a)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>编译也顺利通过了。这到底是肿么回事。大家的结论是，<code>def</code>其实也是一个macro。<code>def...do</code>的内容会在一个非显式的quote中展开，所以萌大奶。</p>
-<p>那么我们还时常看到这种用法。</p>
-<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Hello</span></span> <span class="keyword">do</span></div><div class="line">  [<span class="symbol">:alice</span>, <span class="symbol">:bob</span>] |&gt; Enum.each <span class="keyword">fn</span> name -&gt;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">unquote</span></span>(<span class="symbol">:<span class="string">"hello_<span class="subst">#&#123;name&#125;</span>"</span></span>)() <span class="keyword">do</span></div><div class="line">      IO.inspect(<span class="string">"Hello <span class="subst">#&#123;unquote(name)&#125;</span>"</span>)</div><div class="line">    <span class="keyword">end</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>这个时候就是在编辑阶段动态定义函数了。文档中，这种用法被叫做unquote fragments。<br>那么，为什么这个<code>name</code>在<code>def</code>中需要unquote呢？ 因为这个name在一个非显式的quote中(def unquote…do)。</p>
-<h3 id="Macro-escape"><a href="#Macro-escape" class="headerlink" title="Macro.escape"></a>Macro.escape</h3><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Module1</span></span> <span class="keyword">do</span></div><div class="line">  p = Macro.escape(%&#123;<span class="symbol">name:</span> <span class="string">"hoge"</span>&#125;)</div><div class="line">  string = <span class="string">"abc"</span></div><div class="line">  a = <span class="number">1</span></div><div class="line">  b = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">func1</span></span>(unquote(p)) <span class="keyword">do</span></div><div class="line">    unquote(p)</div><div class="line">    unquote(string)</div><div class="line">    unquote(a)</div><div class="line">    unquote(b)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
-<p>懵了。为什么<code>a,b,string</code>这些东西不需要<code>Macro.escape</code>, 而<code>p</code>需要呢？</p>
-<p>按照文档的说法，</p>
-<blockquote>
-<p> it is important to make a distinction between a regular Elixir value (like a list, a map, a process, a reference, etc) and a quoted expression. Some values, such as integers, atoms and strings, have a quoted expression equal to the value itself. Other values, like maps, need to be explicitly converted.</p>
-</blockquote>
-<p>这是神马意思？</p>
-<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">iex</span>(<span class="number">8</span>)&gt; <span class="selector-tag">quote</span> <span class="selector-tag">do</span></div><div class="line">...(<span class="number">8</span>)&gt; <span class="selector-tag">1</span></div><div class="line">...(<span class="number">8</span>)&gt; <span class="selector-tag">end</span></div><div class="line"><span class="selector-tag">1</span></div><div class="line"></div><div class="line"><span class="selector-tag">iex</span>(<span class="number">9</span>)&gt; <span class="selector-tag">quote</span> <span class="selector-tag">do</span></div><div class="line">...(<span class="number">9</span>)&gt; %&#123;<span class="attribute">name</span>: <span class="string">"www"</span>&#125;</div><div class="line">...(<span class="number">9</span>)&gt; <span class="selector-tag">end</span></div><div class="line">&#123;:%&#123;&#125;, <span class="selector-attr">[]</span>, <span class="selector-attr">[name: "www"]</span>&#125;</div></pre></td></tr></table></figure>
-<p>就是这个意思。 1 的 quote expression 还是 1， 而 <code>%{name: &quot;www&quot;}</code>的quote expression则是 <code>{:%{}, [], [name: &quot;www&quot;]}</code><br><code>Macro.escape</code>的作用就是把value转换成quote expression。</p>
-<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">iex</span>(<span class="number">10</span>)&gt; <span class="selector-tag">Macro</span><span class="selector-class">.escape</span>(%&#123;<span class="attribute">name</span>: <span class="string">"wwww"</span>&#125;)</div><div class="line">&#123;:%&#123;&#125;, [], [<span class="attribute">name</span>: <span class="string">"wwww"</span>]&#125;</div><div class="line">iex(<span class="number">11</span>)&gt; Macro.escape(<span class="number">1</span>)</div><div class="line"><span class="number">1</span></div></pre></td></tr></table></figure>
-<p>由于定义macro的时候，在<code>quote...do</code>中我们需要用<code>unquote</code>去评价 quote expression。所以，先得把map这种类型转换成quote expression。</p>
-<p>Elixir meta programming 算是扫完一遍了。需要完全消化看来还要很久。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/11/09/20161109/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -331,7 +266,6 @@
 </div>
 
 </section>
-
 
 
                 <footer id="footer" class="main-content-wrap">
