@@ -194,13 +194,148 @@
             <div class="postShorten-header">
                 <h1 class="postShorten-title" itemprop="headline">
                     
+                        <a class="link-unstyled" href="/2016/11/22/20161122/">
+                            使用Elixir OTP实现MapReduce
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Tue Nov 22 2016 20:48:19 GMT+0900">
+	
+		    11月 22, 2016
+    	
+    </time>
+    
+</div>
+            </div>
+            
+            
+                <div class="postShorten-content" itemprop="articleBody">
+                    <p><a href="http://dev.classmethod.jp/etc/elixir_otp_mapreduce/" target="_blank" rel="external">原文</a></p>
+<p>Elixir给我们提供了使用多进程实现application的框架OTP(实际是Erlang的东西)。使用OTP可以实现进程间的消息交换，当通信出现错误时候的重启，以及进程状态管理。</p>
+<h2 id="MapReduce"><a href="#MapReduce" class="headerlink" title="MapReduce"></a>MapReduce</h2><h3 id="Apache-Lucene"><a href="#Apache-Lucene" class="headerlink" title="Apache Lucene"></a>Apache Lucene</h3><p>下面介绍一下利用MapReduce机制的一些软件。<br>Lucene是基于Java的文档搜索引擎，在ElasticSearch的内部也用到了MapReduce。<br>Lucene使用MapReduce的机制生成单词以及出现位置的索引。(据说Lucene的作者最早是使用Lisp实现的)。<br>(简单起见，这次我们使用词法分析完毕的文档)</p>
+<h3 id="map函数"><a href="#map函数" class="headerlink" title="map函数"></a>map函数</h3><p>下面是map的简单的例子。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Enum.map([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>], <span class="keyword">fn</span>(elem) -&gt; elem * elem <span class="keyword">end</span>)</div><div class="line"><span class="comment">#=&gt; [1, 4, 9, 16, 25]</span></div></pre></td></tr></table></figure>
+<p>这次的实力中，我们对于多个文档，使用将其变换为”文档编号，单词，单词索引”的map函数。<br>假设我们已经有了下面这种形式的词法分析完毕的文档。</p>
+<figure class="highlight clojure"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;<span class="symbol">:doc1</span>, <span class="string">"ワタシ ハ エリクサー チョット デキル"</span>&#125;</div></pre></td></tr></table></figure>
+<p>(doc1作为文档的ID，各个文档的ID都是独一无二的。)<br>我们将其变换为如下的”文档编号，单词，单词索引”的形式。</p>
+<figure class="highlight clojure"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[&#123;<span class="symbol">:doc1</span>, <span class="string">"ワタシ"</span>, <span class="number">0</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"ハ"</span>, <span class="number">1</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"エリクサー"</span>, <span class="number">2</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"チョット"</span>, <span class="number">3</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"デキル"</span>, <span class="number">4</span>&#125;]</div></pre></td></tr></table></figure>
+<h3 id="reduce函数"><a href="#reduce函数" class="headerlink" title="reduce函数"></a>reduce函数</h3><p>reduce函数接受多个元素以及一个函数，虽然也是将参数带入函数，不过一开始是针对起始的两个元素，接下来将前面对应的结果以及第三个元素带入函数，然后是其结果和第四个元素带入，然后第五个，这样逐渐带入之后元素层层减少最终返回结果。<br>reduce函数的简单的例子如下</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Enum.reduce([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>], <span class="number">0</span>, <span class="keyword">fn</span>(elem, acc) -&gt; elem + acc <span class="keyword">end</span>) <span class="comment"># 第二个参数是初始值</span></div><div class="line"><span class="comment">#=&gt; 15</span></div></pre></td></tr></table></figure>
+<p>这次的例子中，对于刚刚经过map函数处理过的文档，我们使用reduce函数进行统合。将map函数变换过的多个文档</p>
+<figure class="highlight clojure"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[</div><div class="line">[&#123;<span class="symbol">:doc1</span>, <span class="string">"ワタシ"</span>, <span class="number">0</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"ハ"</span>, <span class="number">1</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"エリクサー"</span>, <span class="number">2</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"チョット"</span>, <span class="number">3</span>&#125;, &#123;<span class="symbol">:doc1</span>, <span class="string">"デキル"</span>, <span class="number">4</span>&#125;],</div><div class="line">[&#123;<span class="symbol">:doc2</span>, <span class="string">"ワタシ"</span>, <span class="number">0</span>&#125;, &#123;<span class="symbol">:doc2</span>, <span class="string">"ハ"</span>, <span class="number">1</span>&#125;, &#123;<span class="symbol">:doc2</span>, <span class="string">"ルビー"</span>, <span class="number">2</span>&#125;, &#123;<span class="symbol">:doc2</span>, <span class="string">"チョット"</span>, <span class="number">3</span>&#125;, &#123;<span class="symbol">:doc2</span>, <span class="string">"デキル"</span>, <span class="number">4</span>&#125;]</div><div class="line">]</div></pre></td></tr></table></figure>
+<p>转换成如下形式</p>
+<figure class="highlight ceylon"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">%&#123;<span class="string">"エリクサー"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">2</span>], <span class="string">"チョット"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">3</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">3</span>], <span class="string">"デキル"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">4</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">4</span>],</div><div class="line">  <span class="string">"ハ"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">1</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">1</span>], <span class="string">"ルビー"</span> =&gt; [<span class="meta">doc</span><span class="number">2</span>: <span class="number">2</span>], <span class="string">"ワタシ"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">0</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">0</span>]&#125;</div></pre></td></tr></table></figure>
+<p>到这里我们就获得了文档索引化，通过检索单词就可以获得出现该单词的文档名(文档ID)以及相应的出现的位置。</p>
+<h2 id="使用OTP进行MapReduce"><a href="#使用OTP进行MapReduce" class="headerlink" title="使用OTP进行MapReduce"></a>使用OTP进行MapReduce</h2><h3 id="单线程实现"><a href="#单线程实现" class="headerlink" title="单线程实现"></a>单线程实现</h3><p>首先不使用OTP来实现。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span> <span class="keyword">do</span></div><div class="line">  <span class="comment"># Application入口  </span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">entry</span></span> <span class="keyword">do</span></div><div class="line">    doc1 = &#123;<span class="symbol">:doc1</span>, <span class="string">"ワタシ ハ エリクサー チョット デキル"</span>&#125;</div><div class="line">    doc2 = &#123;<span class="symbol">:doc2</span>, <span class="string">"ワタシ ハ ルビー チョット デキル"</span>&#125;</div><div class="line"></div><div class="line">    [doc1, doc2]</div><div class="line">    |&gt; Enum.map(<span class="keyword">fn</span>(doc) -&gt; MapReduce.word_map(doc) <span class="keyword">end</span>) <span class="comment"># 使用word_map函数实现map</span></div><div class="line">    |&gt; Enum.reduce(%&#123;&#125;, <span class="keyword">fn</span>(items, acc) -&gt; MapReduce.invert_array(items, acc) <span class="keyword">end</span>) <span class="comment"># 使用invert_array实现reduce。</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="comment"># 作为map函数的参数的函数。各个单词将变换成&#123;:doc1, "ワタシ", 0&#125;的形式。</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">word_map</span></span>(&#123;doc_id, words&#125;) <span class="keyword">do</span></div><div class="line">    String.split(words)</div><div class="line">    |&gt; Enum.with_index</div><div class="line">    |&gt; Enum.map(<span class="keyword">fn</span>(tup) -&gt; Tuple.insert_at(tup, <span class="number">0</span>, doc_id) <span class="keyword">end</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="comment"># 作为reduce函数的参数的函数。将上面word_map的结果进行减缩。</span></div><div class="line">  <span class="comment"># 形成%&#123;"ワタシ" =&gt; [doc1: 0, doc2: 0], ....&#125;的字典表。</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">invert_array</span></span>([&#123;doc_id, word, index&#125; | tail], shuffle_map) <span class="keyword">do</span></div><div class="line">    invert_array(tail, Map.put(shuffle_map, word, [&#123;doc_id, index&#125; | Map.get(shuffle_map, word, [])]))</div><div class="line">  <span class="keyword">end</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">invert_array</span></span>([], shuffle_map), <span class="symbol">do:</span> shuffle_map  </div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line">IO.inspect MapReduce.entry</div></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight ceylon"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">%&#123;<span class="string">"エリクサー"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">2</span>], <span class="string">"チョット"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">3</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">3</span>], <span class="string">"デキル"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">4</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">4</span>],</div><div class="line">  <span class="string">"ハ"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">1</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">1</span>], <span class="string">"ルビー"</span> =&gt; [<span class="meta">doc</span><span class="number">2</span>: <span class="number">2</span>], <span class="string">"ワタシ"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">0</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">0</span>]&#125;</div></pre></td></tr></table></figure>
+<h3 id="出现错误的时候怎么办？"><a href="#出现错误的时候怎么办？" class="headerlink" title="出现错误的时候怎么办？"></a>出现错误的时候怎么办？</h3><p>这次的sample相对比较少，出错的话大不了把程序再跑一遍就是了。但是要是要处理的文档很多，那就没这么简单了。</p>
+<p>我们想要这么一种机制，将map函数生成的”文档编号，单词，单词索引”的形式作为状态保存下来，当某个文档处理出现问题的时候，我们仅仅重启处理那个文档的进程，这样就可以继续处理剩下的文档。</p>
+<p>要实现这种机制，我们就需要在文档变换处理结束后将其状态保存，以及实现进程的监视来对应出错时候进程的重启。<br>为了实现该机制，我们使用OTp中的GenServer和Supervisor来实现。<br>下面是对这两个东西的简单说明。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">名称</th>
+<th style="text-align:center">概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">GenServer</td>
+<td style="text-align:center">用来实现能够保持进程状态的Application的模块</td>
+</tr>
+<tr>
+<td style="text-align:center">Supervisor</td>
+<td style="text-align:center">用来监视进程，提供出错重启的机制</td>
+</tr>
+</tbody>
+</table>
+<p>具体清参考Elixir的官网上的GenServer以及Supervisor的说明。</p>
+<h3 id="Supervision-Tree"><a href="#Supervision-Tree" class="headerlink" title="Supervision Tree"></a>Supervision Tree</h3><p>接下来我们按照Supervisor的原理来构建MapReduce中监控各个处理，保存状态，的进程之间的上下关系表。</p>
+<p><img src="http://cdn.dev.classmethod.jp/wp-content/uploads/2015/12/MapReduce-Supervision-Tree.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">名称</th>
+<th style="text-align:center">概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">GenServer</td>
+<td style="text-align:center">用来实现能够保持进程状态的Application的模块</td>
+</tr>
+<tr>
+<td style="text-align:center">Supervisor</td>
+<td style="text-align:center">用来监视进程，提供出错重启的机制</td>
+</tr>
+<tr>
+<td style="text-align:center">MapServer</td>
+<td style="text-align:center">负责将文档转换成”文档编号，单词，单词索引”的形式的进程。处理结束之后将结果保存在Stash中。(因此需要其持有stash的进程号)，这个进程会启动多个进程</td>
+</tr>
+<tr>
+<td style="text-align:center">ReduceSupervisor</td>
+<td style="text-align:center">负责监视ReduceServer的进程。设置ReduceServer的重启策略</td>
+</tr>
+<tr>
+<td style="text-align:center">ReduceServer</td>
+<td style="text-align:center">负责从Stash中获取通过map变换得到的文档，然后将其变换成倒置矩阵的进程(因为要从Stash获取数据所以持有Stash的进程号)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Supervisor"><a href="#Supervisor" class="headerlink" title="Supervisor"></a>Supervisor</h3><p>把先启动的Stash的进程号传递给MapSupervisor和ReduceSupervisor。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span>.Supervisor <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> Supervisor</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span> <span class="keyword">do</span></div><div class="line">    result = &#123;<span class="symbol">:ok</span>, sup &#125; = Supervisor.start_link(__MODULE_<span class="number">_</span>, [])</div><div class="line">    &#123;<span class="symbol">:ok</span>, stash_pid&#125; =</div><div class="line">      Supervisor.start_child(sup, worker(MapReduce.Stash, []))</div><div class="line">    Supervisor.start_child(sup, supervisor(MapReduce.MapSupervisor, [stash_pid]))</div><div class="line">    Supervisor.start_child(sup, supervisor(MapReduce.ReduceServer, [stash_pid]))</div><div class="line">    result</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(<span class="number">_</span>) <span class="keyword">do</span></div><div class="line">    supervise [], <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h3 id="MapSupervisor-ReduceSupervisor"><a href="#MapSupervisor-ReduceSupervisor" class="headerlink" title="MapSupervisor, ReduceSupervisor"></a>MapSupervisor, ReduceSupervisor</h3><p>将从Supervisor获取的Stash的进程号传递给各自启动的字进程。</p>
+<h4 id="MapSupervisor"><a href="#MapSupervisor" class="headerlink" title="MapSupervisor"></a>MapSupervisor</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span>.MapSupervisor <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> Supervisor</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(stash_pid) <span class="keyword">do</span></div><div class="line">    &#123;<span class="symbol">:ok</span>, _pid&#125; = Supervisor.start_link(__MODULE_<span class="number">_</span>, stash_pid)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(stash_pid) <span class="keyword">do</span></div><div class="line">    child_processes = [ worker(MapReduce.MapServer, [stash_pid]) ]</div><div class="line">    supervise child_processes, <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h4 id="ReduceSupervisor"><a href="#ReduceSupervisor" class="headerlink" title="ReduceSupervisor"></a>ReduceSupervisor</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">Mr</span></span>.ReduceSupervisor <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> Supervisor</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(stash_pid) <span class="keyword">do</span></div><div class="line">    &#123;<span class="symbol">:ok</span>, _pid&#125; = Supervisor.start_link(__MODULE_<span class="number">_</span>, stash_pid)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(stash_pid) <span class="keyword">do</span></div><div class="line">    child_processes = [ worker(MapReduce.ReduceServer, [stash_pid]) ]</div><div class="line">    supervise child_processes, <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h3 id="Stash"><a href="#Stash" class="headerlink" title="Stash"></a>Stash</h3><p>为了保存MapServer变换结果的文档我们使用GenServer。<br>我们这里定义了供其进程调用的<code>save_document</code>以及<code>get_document</code>两个函数，对于这两个函数的callback我们需要自己进行实现。<br>只通过实现callback函数就能实现进程间的通信了。<br>这个进程在启动的时候会建立一个空的list，当其他的进程调用<code>save_document</code>的时候就会往这个list中追加data。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span>.Stash <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> GenServer</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span> <span class="keyword">do</span></div><div class="line">    GenServer.start_link(__MODULE_<span class="number">_</span>, []) <span class="comment"># 启动时候带一个空的list，之后往这里追加文档</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">save_document</span></span>(pid, indexing_doc) <span class="keyword">do</span></div><div class="line">    GenServer.cast pid, &#123;<span class="symbol">:save_document</span>, indexing_doc&#125;</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">get_documents</span></span>(pid) <span class="keyword">do</span></div><div class="line">    GenServer.call pid, <span class="symbol">:get_documents</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="comment">#####</span></div><div class="line">  <span class="comment"># GenServer implementation</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handle_cast</span></span>(&#123;<span class="symbol">:save_document</span>, indexing_doc&#125;, docs) <span class="keyword">do</span></div><div class="line">    &#123;<span class="symbol">:noreply</span>, [indexing_doc|docs]&#125; <span class="comment"># 这里的docs是启动时候定义的list，将会往这里追加元素</span></div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handle_call</span></span>(<span class="symbol">:get_documents</span>, _from, docs) <span class="keyword">do</span></div><div class="line">    <span class="comment"># 这离的docs同样是启动时候的那个list，这里的tuple的第二个元素是返回给调用者的消息，第三个元素是继续保存在进程中的list(状态)</span></div><div class="line">    &#123;<span class="symbol">:reply</span>, docs, docs&#125;</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h3 id="MapServer"><a href="#MapServer" class="headerlink" title="MapServer"></a>MapServer</h3><p>这个进程需要保持启动时候从Stash获取的进程号所以使用Genserver。<br>实际上对文档进行变换的函数(word_map)我们放在别的文件中定义。为了将文档变换的结果保存到Stash中，我们调用<code>Stash.save_document</code>。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span>.MapServer <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> GenServer</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(stash_pid) <span class="keyword">do</span></div><div class="line">    GenServer.start_link(__MODULE_<span class="number">_</span>, stash_pid, <span class="symbol">name:</span> __MODULE_<span class="number">_</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">make_indexing_document</span></span>(words_list) <span class="keyword">do</span></div><div class="line">    GenServer.cast(__MODULE_<span class="number">_</span>, &#123;<span class="symbol">:make_indexing_document</span>, words_list&#125;)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">    <span class="comment"># 在这里开始进行处理</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">make_indexing_documents</span></span>(words_list) <span class="keyword">when</span> is_list(words_list) <span class="keyword">do</span></div><div class="line">    words_list</div><div class="line">    |&gt; Enum.map(&amp;(Task.async(<span class="keyword">fn</span> -&gt; make_indexing_document(&amp;<span class="number">1</span>) <span class="keyword">end</span>)))</div><div class="line">    |&gt; Enum.map(&amp;Task.await/<span class="number">1</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">get_documents</span></span> <span class="keyword">do</span></div><div class="line">    GenServer.call(__MODULE_<span class="number">_</span>, <span class="symbol">:get_documents</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handle_cast</span></span>(&#123;<span class="symbol">:make_indexing_document</span>, words&#125;, stash_pid) <span class="keyword">do</span></div><div class="line">    word_map(stash_pid, words)</div><div class="line">    &#123;<span class="symbol">:noreply</span>, stash_pid&#125;</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handle_call</span></span>(<span class="symbol">:get_documents</span>, _from, stash_pid) <span class="keyword">do</span></div><div class="line">    &#123;<span class="symbol">:reply</span>, MapReduce.Stash.get_documents(stash_pid), stash_pid&#125;</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="comment"># 在这里进行文档的变换，将结果保存到Stash中。</span></div><div class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">word_map</span></span>(stash_pid, &#123;doc_id, words&#125;) <span class="keyword">do</span></div><div class="line">    indexing_doc = MapReduce.WorkerFunction.word_map(&#123;doc_id, words&#125;)</div><div class="line">    <span class="symbol">:ok</span> = MapReduce.Stash.save_document(stash_pid, indexing_doc)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h3 id="ReduceServer"><a href="#ReduceServer" class="headerlink" title="ReduceServer"></a>ReduceServer</h3><p>因为需要从Stash中活去经过MapServer变换的文档，所以我们需要继续保存Stash的进程号。<br>统合成倒置矩阵的函数我们在别的文件中定义。<br>在函数处理之前我们调用<code>Stash.get_documents(stash_pid)</code>获取要处理的文档。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span>.ReduceServer <span class="keyword">do</span></div><div class="line">  <span class="keyword">use</span> GenServer</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(stash_pid) <span class="keyword">do</span></div><div class="line">    GenServer.start_link(__MODULE_<span class="number">_</span>, stash_pid, <span class="symbol">name:</span> __MODULE_<span class="number">_</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="comment"># 从这里开始处理</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">make_inverted_array</span></span> <span class="keyword">do</span></div><div class="line">    GenServer.call(__MODULE_<span class="number">_</span>, <span class="symbol">:make_inverted_array</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="comment"># 在这里将从map变换来的文档变换成倒置矩阵。</span></div><div class="line">  <span class="comment"># 处理需要从Stash进程中获取文档的list</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">handle_call</span></span>(<span class="symbol">:make_inverted_array</span>, _from, stash_pid) <span class="keyword">do</span></div><div class="line">    indexing_docs = MapReduce.Stash.get_documents(stash_pid)</div><div class="line">    &#123;<span class="symbol">:reply</span>, invert_array(indexing_docs), stash_pid &#125;</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">invert_array</span></span>(indexing_docs) <span class="keyword">do</span></div><div class="line">    MapReduce.WorkerFunction.invert_array(indexing_docs)</div><div class="line">  <span class="keyword">end</span></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h3 id="word-map-invert-array的实现"><a href="#word-map-invert-array的实现" class="headerlink" title="word_map, invert_array的实现"></a>word_map, invert_array的实现</h3><p>我们在另一个文件中实现了这些函数。和之前单进程的例子几乎一样。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">MapReduce</span></span>.WorkerFunction <span class="keyword">do</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">word_map</span></span>(&#123;doc_id, words&#125;) <span class="keyword">do</span></div><div class="line">    String.split(words)</div><div class="line">    |&gt; Enum.with_index</div><div class="line">    |&gt; Enum.map(<span class="keyword">fn</span>(tup) -&gt; Tuple.insert_at(tup, <span class="number">0</span>, doc_id) <span class="keyword">end</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">invert_array</span></span>(items) <span class="keyword">do</span></div><div class="line">    items</div><div class="line">    |&gt; Enum.reduce(%&#123;&#125;, <span class="keyword">fn</span>(item, acc) -&gt; invert_array(item, acc) <span class="keyword">end</span>)</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">invert_array</span></span>([&#123;doc_id, word, index&#125; | tail], shuffle_map) <span class="keyword">do</span></div><div class="line">    invert_array(tail, Map.put(shuffle_map, word, [&#123;doc_id, index&#125; | Map.get(shuffle_map, word, [])]))</div><div class="line">  <span class="keyword">end</span></div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">invert_array</span></span>([], shuffle_map), <span class="symbol">do:</span> shuffle_map</div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure>
+<h3 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h3><p>因为用的例子和单进程实现相同所以其实并没什么意义，但是总之先跑一下看看。<br>首先在项目根目录启动REPL(IEx)，然后准备好数据。</p>
+<figure class="highlight ceylon"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">iex -S mix</div><div class="line">Erlang/OTP <span class="number">18</span> [erts-<span class="number">7.1</span>] <span class="number">1</span> [<span class="number">64</span>-bit] [smp:<span class="number">4</span>:<span class="number">4</span>] [async-threads:<span class="number">10</span>] [hipe] [kernel-poll:false] [dtrace]</div><div class="line"></div><div class="line">Interactive Elixir (<span class="number">1.1</span>.<span class="number">1</span>) - press Ctrl+C to exit (type h() ENTER <span class="keyword">for</span> help)</div><div class="line">iex(<span class="number">1</span>)&gt; <span class="meta">doc</span><span class="number">1</span> = &#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"ワタシ ハ エリクサー チョット デキル"</span>&#125;</div><div class="line">&#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"ワタシ ハ エリクサー チョット デキル"</span>&#125;</div><div class="line">iex(<span class="number">2</span>)&gt; <span class="meta">doc</span><span class="number">2</span> = &#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"ワタシ ハ ルビー チョット デキル"</span>&#125;</div><div class="line">&#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"ワタシ ハ ルビー チョット デキル"</span>&#125;</div><div class="line">iex(<span class="number">3</span>)&gt; <span class="meta">doc</span><span class="number">3</span> = &#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"ワタシ ハ リナックス チョット デキル"</span>&#125;</div><div class="line">&#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"ワタシ ハ リナックス チョット デキル"</span>&#125;</div></pre></td></tr></table></figure>
+<p>接下来进行Map处理。可以看到追加的数据被存放到了list中。</p>
+<figure class="highlight ceylon"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">iex(<span class="number">4</span>)&gt; MapReduce.MapServer.make<span class="number">_</span>indexing<span class="number">_</span>documents [<span class="meta">doc</span><span class="number">1</span>, <span class="meta">doc</span><span class="number">2</span>, <span class="meta">doc</span><span class="number">3</span>]</div><div class="line">iex(<span class="number">5</span>)&gt; MapReduce.MapServer.get<span class="number">_</span>documents</div><div class="line">[[&#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"ワタシ"</span>, <span class="number">0</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"ハ"</span>, <span class="number">1</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"リナックス"</span>, <span class="number">2</span>&#125;,</div><div class="line">  &#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"チョット"</span>, <span class="number">3</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">3</span>, <span class="string">"デキル"</span>, <span class="number">4</span>&#125;],</div><div class="line"> [&#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"ワタシ"</span>, <span class="number">0</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"ハ"</span>, <span class="number">1</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"ルビー"</span>, <span class="number">2</span>&#125;,</div><div class="line">  &#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"チョット"</span>, <span class="number">3</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">2</span>, <span class="string">"デキル"</span>, <span class="number">4</span>&#125;],</div><div class="line"> [&#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"ワタシ"</span>, <span class="number">0</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"ハ"</span>, <span class="number">1</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"エリクサー"</span>, <span class="number">2</span>&#125;,</div><div class="line">  &#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"チョット"</span>, <span class="number">3</span>&#125;, &#123;:<span class="meta">doc</span><span class="number">1</span>, <span class="string">"デキル"</span>, <span class="number">4</span>&#125;]]</div></pre></td></tr></table></figure>
+<p>最后进行Reduce生成倒置矩阵。</p>
+<figure class="highlight ceylon"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">iex(<span class="number">6</span>)&gt; MapReduce.ReduceServer.make<span class="number">_</span>inverted<span class="number">_</span>array</div><div class="line">%&#123;<span class="string">"エリクサー"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">2</span>], <span class="string">"チョット"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">3</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">3</span>, <span class="meta">doc</span><span class="number">3</span>: <span class="number">3</span>],</div><div class="line">  <span class="string">"デキル"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">4</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">4</span>, <span class="meta">doc</span><span class="number">3</span>: <span class="number">4</span>],</div><div class="line">  <span class="string">"ハ"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">1</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">1</span>, <span class="meta">doc</span><span class="number">3</span>: <span class="number">1</span>], <span class="string">"リナックス"</span> =&gt; [<span class="meta">doc</span><span class="number">3</span>: <span class="number">2</span>],</div><div class="line">  <span class="string">"ルビー"</span> =&gt; [<span class="meta">doc</span><span class="number">2</span>: <span class="number">2</span>], <span class="string">"ワタシ"</span> =&gt; [<span class="meta">doc</span><span class="number">1</span>: <span class="number">0</span>, <span class="meta">doc</span><span class="number">2</span>: <span class="number">0</span>, <span class="meta">doc</span><span class="number">3</span>: <span class="number">0</span>]&#125;</div></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>使用OTP可以非常轻松实现多进程的application。<br>如果换成别的语言用线程或者进程来实现重启策略会非常麻烦，想到这里笔者就感觉OTP是在是难能可贵。<br>在官网上也有使用OTP实现kvs的示例，大家有兴趣的话务必试一下。</p>
+
+                    
+                        
+
+                    
+                    
+                        <p>
+                            <a href="/2016/11/22/20161122/#post-footer" class="postShorten-excerpt_link link">
+                                评论
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
+        <div class="postShorten-wrap">
+            <div class="postShorten-header">
+                <h1 class="postShorten-title" itemprop="headline">
+                    
                         <a class="link-unstyled" href="/2016/11/17/20161117/">
                             在Phoenix中使用Ueberauth实现第三方登陆
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Nov 17 2016 14:01:08 GMT+0000">
+    <time itemprop="datePublished" content="Thu Nov 17 2016 23:01:08 GMT+0900">
 	
 		    11月 17, 2016
     	
@@ -269,7 +404,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Nov 09 2016 12:44:08 GMT+0000">
+    <time itemprop="datePublished" content="Wed Nov 09 2016 21:44:08 GMT+0900">
 	
 		    11月 09, 2016
     	
@@ -334,7 +469,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 30 2016 14:58:05 GMT+0000">
+    <time itemprop="datePublished" content="Sun Oct 30 2016 23:58:05 GMT+0900">
 	
 		    10月 30, 2016
     	
@@ -394,7 +529,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Tue Oct 11 2016 14:34:37 GMT+0000">
+    <time itemprop="datePublished" content="Tue Oct 11 2016 23:34:37 GMT+0900">
 	
 		    10月 11, 2016
     	
@@ -451,7 +586,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Oct 02 2016 13:09:40 GMT+0000">
+    <time itemprop="datePublished" content="Sun Oct 02 2016 22:09:40 GMT+0900">
 	
 		    10月 02, 2016
     	
@@ -522,7 +657,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Thu Sep 22 2016 03:59:57 GMT+0000">
+    <time itemprop="datePublished" content="Thu Sep 22 2016 12:59:57 GMT+0900">
 	
 		    9月 22, 2016
     	
@@ -574,7 +709,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 10 2016 10:42:35 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jul 10 2016 19:42:35 GMT+0900">
 	
 		    7月 10, 2016
     	
@@ -637,7 +772,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jul 03 2016 13:06:28 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jul 03 2016 22:06:28 GMT+0900">
 	
 		    7月 03, 2016
     	
@@ -690,7 +825,7 @@
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Sun Jun 26 2016 09:32:22 GMT+0000">
+    <time itemprop="datePublished" content="Sun Jun 26 2016 18:32:22 GMT+0900">
 	
 		    6月 26, 2016
     	
@@ -728,57 +863,6 @@
                     
                         <p>
                             <a href="/2016/06/26/20160626-md/#post-footer" class="postShorten-excerpt_link link">
-                                评论
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom" itemscope itemType="http://schema.org/BlogPosting">
-        <div class="postShorten-wrap">
-            <div class="postShorten-header">
-                <h1 class="postShorten-title" itemprop="headline">
-                    
-                        <a class="link-unstyled" href="/2016/06/15/20160615/">
-                            我们也许并不合适
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Wed Jun 15 2016 15:40:06 GMT+0000">
-	
-		    6月 15, 2016
-    	
-    </time>
-    
-</div>
-            </div>
-            
-            
-                <div class="postShorten-content" itemprop="articleBody">
-                    <p>收到人事发来的婉拒信，也不过是今天下午的事情。<br>之前厌恶了当前的项目，摩拳擦掌准备换个部门，甚至已经和对方部门的经理谈笑风声，到头来却似乎什么也没有发生一样。<br>如果要自己检讨一下失败的原因，倒是可以想到太多因素。<br>一一道来的话怕是把自己人格否定了。<br>刚准备自我陶醉在失落的心情之中的时候，脑海里划过当年好友在我穷追烂打某妹子失败时候说的一番话。</p>
-<h3 id="为什么我不合适"><a href="#为什么我不合适" class="headerlink" title="为什么我不合适"></a>为什么我不合适</h3><p>读研究生的时候我喜欢过一个女生。至于为什么会喜欢上，其实也没有仔细去考虑过。<br>有那么一阵子，当得知那个女生在国内其实有男朋友的时候，我甚至毫无犹豫做好了挖墙脚的准备。<br>我这么自信其实是有原因的。首先认识的时候大家的第一印象十分不错。其次当时已经拿到了自己认为不错的公司的内定，相当于未来已经有了保障。而那位女生的男友却还是在苦战国内的二次考研。再加上我和女生有着共同的兴趣爱好，甚至家的位置都是在同一个町内。我的感觉告诉我，这局该是轻松拿下。<br>可是事与愿违，当我千方百计表现得自己非常优秀，非常幽默，总之尽把自己好的一面展示出来的时候，换来的却只是女生的各种无视。<br>忘了大概什么时候开始就死心了。如果可能的话，当时真会想去问一句，我到底哪里错了？为什么不行呢？<br>作为反省，我翻阅了大量的街头巷尾的恋爱心理学书籍，不断地总结和反思自己的过错。不过终究没能得出什么结论。</p>
-<p>直到后来和好友聊起自己的失败谈，总算被他的一番话如雷贯耳，大彻大悟。</p>
-<p>跳槽和追妹其实异曲同工。<br>首先它们都是双向选择，一时冲动我们总是想千方百计去证明自己有多合适，而往往忽略了我们自己真实的想法，反而掩饰了真实的自我。<br>（比如，当被问及有可能要长时间加班，甚至半夜起来紧急对应的时候，我的内心已经很虚，却强作正经。<br>再比如为了强烈迎合想追妹子的兴趣爱好，怀着并不感冒的心情硬是看完了某漫画的20多卷。）</p>
-<p>其次工作的机会和能够邂逅的妹子的机会简直多得不计其数。（如果你表示怀疑，不妨回忆一下，上下班的路上你看到的觉得可爱的女生有多少。所以我们的未来很有可能遇到合适自己的工作或者异性）我们求职跳槽追妹子，目的不过就是找到自己感兴趣的，能够长期坚持下去的目标而已。被决绝之后，我们往往自我陶醉在失落的心情中，甚至这种失落的心情给人带来了安心感。其实也大可不必。</p>
-<p>说了那么多，其实都是我听了好友的一番话之后自己的感悟而已。其实当时好友仅仅说了一句话。</p>
-<p>“我觉得你也并没有错，只是对方傻逼而已”</p>
-<p>虽然要是换位思考，我该是会被对方的努力感动地稀里糊涂吧。</p>
-<p>而作为小标题的答案，其实并不是我不合适，只是“我们”不合适而已。</p>
-<h3 id="我到底想要什么"><a href="#我到底想要什么" class="headerlink" title="我到底想要什么"></a>我到底想要什么</h3><p>我想要深入了解Ruby以及Rails框架，熟悉网络服务开发的各个环节，成为一名优秀的全栈工程师。开发和维护能使世界上大部分人幸福的网络服务。<br>我想找个可爱善解人意的妹子，有着共通的兴趣爱好和话题，能够互相帮助互相进步。<br>最好是， 大胸。</p>
-
-                    
-                        
-
-                    
-                    
-                        <p>
-                            <a href="/2016/06/15/20160615/#post-footer" class="postShorten-excerpt_link link">
                                 评论
                             </a>
                         </p>
